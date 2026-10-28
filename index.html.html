@@ -1,0 +1,2828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Consultora en Crisis | Andina Motion S.A. — Simulador de Comercio Internacional</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --c-violet-dark: #16062E;
+      --c-violet-mid: #280B54;
+      --c-fuchsia: #FF1E8A;
+      --c-yellow: #FFE600;
+      --c-turquoise: #00F0FF;
+      --c-orange: #FF6B00;
+      --c-purple: #8B2CF5;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--c-violet-dark);
+      color: #FFFFFF;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, .font-game {
+      font-family: 'Fredoka', sans-serif;
+      letter-spacing: 0.01em;
+    }
+    /* Animated background shapes */
+    .bg-crisis-mesh {
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255, 30, 138, 0.28) 0%, transparent 42%),
+        radial-gradient(circle at 88% 15%, rgba(0, 240, 255, 0.24) 0%, transparent 40%),
+        radial-gradient(circle at 80% 82%, rgba(255, 107, 0, 0.25) 0%, transparent 45%),
+        radial-gradient(circle at 20% 85%, rgba(139, 44, 245, 0.35) 0%, transparent 45%),
+        linear-gradient(145deg, #130429 0%, #24084E 55%, #160530 100%);
+    }
+    /* Game card neo-arcade look */
+    .game-card {
+      background: rgba(34, 11, 72, 0.88);
+      backdrop-filter: blur(14px);
+      border: 3px solid rgba(255, 255, 255, 0.18);
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 0 rgba(10, 2, 24, 0.75), 0 20px 40px rgba(0, 0, 0, 0.45);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .game-btn {
+      font-family: 'Fredoka', sans-serif;
+      border: 3px solid #120324;
+      border-radius: 1.15rem;
+      box-shadow: 0 6px 0 #120324;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.15s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .game-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #120324;
+      filter: brightness(1.06);
+    }
+    .game-btn:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #120324;
+    }
+    .game-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: 0 3px 0 rgba(18, 3, 36, 0.5);
+    }
+    /* Round specific border & glow accents */
+    .theme-r1 {
+      --round-accent: #FF1E8A;
+      --round-soft: rgba(255, 30, 138, 0.18);
+    }
+    .theme-r2 {
+      --round-accent: #00F0FF;
+      --round-soft: rgba(0, 240, 255, 0.18);
+    }
+    .theme-r3 {
+      --round-accent: #FFE600;
+      --round-soft: rgba(255, 230, 0, 0.18);
+    }
+    .theme-r4 {
+      --round-accent: #FF6B00;
+      --round-soft: rgba(255, 107, 0, 0.20);
+    }
+    .round-banner {
+      border-color: var(--round-accent, #FF1E8A);
+      box-shadow: 0 8px 0 rgba(10, 2, 24, 0.8), 0 0 28px var(--round-soft, rgba(255, 30, 138, 0.25));
+    }
+    .choice-pill {
+      border: 2.5px solid rgba(255, 255, 255, 0.2);
+      background: rgba(20, 6, 44, 0.75);
+      border-radius: 1.1rem;
+      transition: all 0.16s ease;
+    }
+    .choice-pill:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    .choice-pill.selected {
+      border-color: var(--round-accent, #FFE600);
+      background: var(--round-soft, rgba(255, 230, 0, 0.2));
+      box-shadow: 0 5px 0 rgba(0, 0, 0, 0.6), 0 0 18px var(--round-soft, rgba(255, 230, 0, 0.35));
+    }
+    @keyframes popScore {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popScore 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes pulseUrgent {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .timer-urgent {
+      animation: pulseUrgent 1s infinite ease-in-out;
+    }
+    /* Projector mode adjustments */
+    body.projector-mode .hide-on-projector {
+      display: none !important;
+    }
+    body.projector-mode .projector-scale {
+      font-size: 1.18rem;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #14052B; }
+    ::-webkit-scrollbar-thumb { background: #FF1E8A; border-radius: 99px; }
+  </style>
+</head>
+<body class="bg-crisis-mesh selection:bg-[#FF1E8A] selection:text-white">
+
+  <!-- FLOATING CONFETTI / SCORE BURST LAYER -->
+  <div id="fxLayer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+  <!-- TOAST NOTIFICATION LAYER -->
+  <div id="toastContainer" class="fixed top-4 right-4 left-4 sm:left-auto sm:w-96 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 border-b-2 border-white/15 bg-[#14042B]/90 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#FF1E8A] via-[#FF6B00] to-[#FFE600] p-0.5 shadow-md flex items-center justify-center border-2 border-[#120324]">
+          <span class="text-2xl" role="img" aria-label="Rayo">⚡</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-game text-lg sm:text-xl font-bold tracking-tight text-white">CONSULTORA EN CRISIS</span>
+            <span id="syncBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#00F0FF]/20 text-[#00F0FF] border border-[#00F0FF]/40">EN VIVO</span>
+          </div>
+          <p class="text-xs text-white/75 hidden sm:block">Caso: <strong class="text-[#FFE600]">Andina Motion S.A.</strong> (Colombia ➔ EE. UU. en 5 años)</p>
+        </div>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- Team Score Pill (visible when playing) -->
+        <div id="headerTeamStatus" class="hidden items-center gap-2 bg-white/10 border-2 border-white/20 rounded-xl px-3 py-1">
+          <span id="headerTeamName" class="font-game text-sm text-[#00F0FF] truncate max-w-[120px] sm:max-w-[180px]">Equipo</span>
+          <span class="text-xs text-white/50">|</span>
+          <span class="font-game text-base text-[#FFE600]"><span id="headerTeamScore">0</span><span class="text-xs text-white/70">/40 pts</span></span>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button id="btnToggleSound" type="button" class="game-btn bg-[#2C0E5E] text-white px-3 py-1.5 text-xs sm:text-sm flex items-center gap-1" title="Activar/Silenciar efectos de sonido">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden md:inline">Sonido</span>
+        </button>
+
+        <!-- Teacher Fast-Forward / Test Mode Toggle -->
+        <button id="btnOpenTestTools" type="button" class="game-btn bg-[#FF6B00] text-[#120324] font-bold px-3 py-1.5 text-xs sm:text-sm flex items-center gap-1" title="Herramientas de prueba rápida y configuración">
+          <span>🛠️</span>
+          <span>Config / Prueba</span>
+        </button>
+
+        <!-- Switch between Player & Host Panel -->
+        <button id="btnSwitchHostView" type="button" class="game-btn bg-[#FF1E8A] text-white font-bold px-3 py-1.5 text-xs sm:text-sm flex items-center gap-1">
+          <span>👑</span>
+          <span id="btnSwitchHostLabel">Panel: Paula, Caterin y Jorge</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-5xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: LOBBY / TEAM REGISTRATION          -->
+    <!-- ========================================== -->
+    <section id="viewLobby" class="space-y-6">
+      <!-- Hero Briefing Card -->
+      <div class="game-card p-5 sm:p-8 border-[#FF1E8A] relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-[#FF1E8A]/20 blur-2xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+          <div class="space-y-3 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFE600] text-[#120324] font-game text-xs sm:text-sm font-bold uppercase">
+              <span>🚴‍♂️ Misión Internacional • 4 Rondas • 40 Puntos</span>
+            </div>
+            <h1 class="font-game text-3xl sm:text-5xl font-bold leading-tight text-white">
+              ¡Salven la expansión de <span class="text-[#00F0FF] underline decoration-[#FF1E8A] decoration-4">Andina Motion S.A.</span>!
+            </h1>
+            <p class="text-sm sm:text-base text-white/90 leading-relaxed">
+              Son una firma consultora contratada de urgencia por <strong>Andina Motion S.A.</strong>, fabricante colombiano de motores y baterías inteligentes para bicicletas eléctricas. El directorio quiere conquistar el mercado de <strong>Estados Unidos en 5 años</strong>, pero el CEO, <strong>Don Alejandro Vega</strong>, no tolera respuestas genéricas.
+            </p>
+          </div>
+          <!-- Mini Rules Box -->
+          <div class="w-full md:w-72 bg-[#14042B]/90 border-2 border-[#00F0FF] rounded-2xl p-4 space-y-2.5 shrink-0">
+            <div class="font-game text-[#00F0FF] text-base flex items-center gap-1.5">
+              <span>⏱️</span> <span>REGLAS DE TIEMPO</span>
+            </div>
+            <ul class="text-xs sm:text-sm space-y-1.5 text-white/90">
+              <li class="flex items-start gap-2"><span class="text-[#FFE600] font-bold">15 min</span> <span>por ronda con reloj en vivo.</span></li>
+              <li class="flex items-start gap-2"><span class="text-[#FF1E8A] font-bold">7 min</span> <span>mínimos de debate antes de habilitar el envío al CEO.</span></li>
+              <li class="flex items-start gap-2"><span class="text-[#00F0FF] font-bold">2:30 min</span> <span>y mínimo 15 caracteres para responder la contrapregunta del CEO.</span></li>
+              <li class="flex items-start gap-2"><span class="text-[#FF6B00] font-bold">Pitch 2m</span> <span>al finalizar las 4 rondas.</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4 Rounds Preview Pills -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
+          <div class="p-3 rounded-xl bg-[#FF1E8A]/20 border-2 border-[#FF1E8A]">
+            <div class="text-xs font-bold text-[#FF1E8A] uppercase">Ronda 1 • 10 pts</div>
+            <div class="font-game text-sm sm:text-base text-white mt-0.5">🔮 Escenarios PESTEL</div>
+          </div>
+          <div class="p-3 rounded-xl bg-[#00F0FF]/20 border-2 border-[#00F0FF]">
+            <div class="text-xs font-bold text-[#00F0FF] uppercase">Ronda 2 • 10 pts</div>
+            <div class="font-game text-sm sm:text-base text-white mt-0.5">🚢 Cadena de Suministro</div>
+          </div>
+          <div class="p-3 rounded-xl bg-[#FFE600]/20 border-2 border-[#FFE600]">
+            <div class="text-xs font-bold text-[#FFE600] uppercase">Ronda 3 • 10 pts</div>
+            <div class="font-game text-sm sm:text-base text-white mt-0.5">🤖 Gobernanza IA & Datos</div>
+          </div>
+          <div class="p-3 rounded-xl bg-[#FF6B00]/20 border-2 border-[#FF6B00]">
+            <div class="text-xs font-bold text-[#FF6B00] uppercase">Ronda 4 • 10 pts</div>
+            <div class="font-game text-sm sm:text-base text-white mt-0.5">🌪️ Crisis & Ambidestreza</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registration & Resume Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Team Join Form -->
+        <div class="lg:col-span-7 game-card p-5 sm:p-7 border-[#FFE600]">
+          <h2 class="font-game text-2xl sm:text-3xl text-[#FFE600] mb-1">🚀 Registrar Consultora</h2>
+          <p class="text-xs sm:text-sm text-white/80 mb-5">Entren desde su sala privada de Microsoft Teams. Un integrante registra el equipo o cada miembro sigue el marcador en vivo.</p>
+
+          <form id="formJoinTeam" class="space-y-4">
+            <div>
+              <label for="inputTeamName" class="block text-sm font-bold text-white mb-1.5">Nombre de tu Firma Consultora *</label>
+              <input id="inputTeamName" type="text" required maxlength="40" placeholder="Ej. Alfa Estrategia Global, Andes NextGen..." class="w-full px-4 py-3.5 rounded-xl bg-[#120324] border-2 border-white/30 text-white text-base sm:text-lg font-bold focus:outline-none focus:border-[#FFE600]" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="selectRoomNumber" class="block text-sm font-bold text-white mb-1.5">Sala de Microsoft Teams</label>
+                <select id="selectRoomNumber" class="w-full px-4 py-3.5 rounded-xl bg-[#120324] border-2 border-white/30 text-white text-base font-semibold focus:outline-none focus:border-[#00F0FF]">
+                  <option value="Sala 1">Sala Privada 1</option>
+                  <option value="Sala 2">Sala Privada 2</option>
+                  <option value="Sala 3">Sala Privada 3</option>
+                  <option value="Sala 4">Sala Privada 4</option>
+                </select>
+              </div>
+              <div>
+                <label for="inputMembers" class="block text-sm font-bold text-white mb-1.5">Integrantes (opcional)</label>
+                <input id="inputMembers" type="text" maxlength="80" placeholder="Ej. Laura, Mateo, Sofía, Juan" class="w-full px-4 py-3.5 rounded-xl bg-[#120324] border-2 border-white/30 text-white text-base focus:outline-none focus:border-[#00F0FF]" />
+              </div>
+            </div>
+
+            <button type="submit" class="w-full game-btn bg-[#FFE600] text-[#120324] text-lg sm:text-xl font-bold py-4 px-6 mt-2 flex items-center justify-center gap-2">
+              <span>🔥 ¡ENTRAR A LA SALA DE JUNTA!</span>
+            </button>
+          </form>
+
+          <!-- Quick Demo Populate for Testing -->
+          <div class="mt-5 pt-4 border-t border-white/15 flex flex-wrap items-center justify-between gap-2 text-xs text-white/75">
+            <span>¿Quieres probar cómo se ven los 4 equipos jugando en vivo?</span>
+            <button id="btnSeedDemoTeams" type="button" class="underline font-bold text-[#00F0FF] hover:text-[#FFE600]">✨ Cargar 4 equipos de demostración</button>
+          </div>
+        </div>
+
+        <!-- Active Teams / Resume Box -->
+        <div class="lg:col-span-5 game-card p-5 sm:p-7 border-[#00F0FF] flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-game text-xl sm:text-2xl text-[#00F0FF]">🏆 Equipos en Sala</h2>
+              <span id="lobbyTeamCount" class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#00F0FF]/20 text-[#00F0FF]">0 equipos</span>
+            </div>
+            <p class="text-xs text-white/75 mb-4">Si tu equipo ya inició partida o cambiaste de celular, toca tu consultora para retomar donde iban:</p>
+            <div id="lobbyTeamsList" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-white/15 flex items-center justify-between text-xs text-white/70">
+            <span>¿Equipo anfitrión (Paula, Caterin y Jorge)?</span>
+            <button id="btnLobbyGoHost" type="button" class="font-bold text-[#FF1E8A] hover:underline">Abrir Marcador con ?host=CLAVE ➔</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: ACTIVE GAMEPLAY (4 ROUNDS)         -->
+    <!-- ========================================== -->
+    <section id="viewGame" class="hidden space-y-6">
+
+      <!-- Round Progress Stepper & Sticky Countdown Bar -->
+      <div id="roundThemeContainer" class="theme-r1 space-y-5">
+
+        <!-- Stepper + Timer Header Card -->
+        <div class="game-card round-banner p-4 sm:p-5">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- Stepper Pills -->
+            <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 md:pb-0">
+              <div id="stepPill1" class="px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2">R1 • PESTEL</div>
+              <div id="stepPill2" class="px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2">R2 • Suministro</div>
+              <div id="stepPill3" class="px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2">R3 • IA & Datos</div>
+              <div id="stepPill4" class="px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2">R4 • Sorpresa</div>
+              <div id="stepPill5" class="px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2">🎤 Pitch</div>
+            </div>
+
+            <!-- Main 15-Minute Round Timer -->
+            <div class="flex items-center justify-between md:justify-end gap-3 bg-[#120324] border-2 border-white/25 rounded-2xl px-4 py-2">
+              <div class="text-left">
+                <div class="text-[10px] uppercase tracking-wider text-white/70 font-bold">Tiempo de Ronda (15 min)</div>
+                <div id="roundLockHint" class="text-xs font-bold text-[#FFE600]">🔒 Envío se habilita a los 08:00</div>
+              </div>
+              <div id="roundClockDisplay" class="font-game text-2xl sm:text-3xl font-bold text-white tabular-nums px-2 py-0.5 rounded-lg bg-white/10">15:00</div>
+            </div>
+          </div>
+
+          <!-- 7-Minute Minimum Thinking Progress Bar -->
+          <div id="submitUnlockBarWrapper" class="mt-3 pt-3 border-t border-white/15">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span id="submitUnlockStatusText" class="font-bold text-[#FFE600]">⏳ Tiempo mínimo de debate en equipo (7:00 min requeridos antes de enviar)</span>
+              <div class="flex items-center gap-2">
+                <span id="submitUnlockCountdown" class="font-mono font-bold text-white">Faltan 07:00</span>
+                <button id="btnQuickUnlockRound" type="button" class="text-[11px] px-2 py-0.5 rounded bg-white/15 hover:bg-[#FFE600] hover:text-[#120324] font-bold transition" title="Adelantar reloj para pruebas">⚡ Adelantar (Prueba)</button>
+              </div>
+            </div>
+            <div class="w-full h-3 bg-[#120324] rounded-full overflow-hidden border border-white/20">
+              <div id="submitUnlockProgressFill" class="h-full bg-gradient-to-r from-[#FF1E8A] via-[#FF6B00] to-[#FFE600] transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROUND CONTENT CARD -->
+        <div id="roundDecisionCard" class="game-card round-banner p-5 sm:p-7 space-y-6">
+          <!-- Dynamic Header injected by JS -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-white/15 pb-4">
+            <div>
+              <span id="roundBadgeLabel" class="inline-block text-xs font-bold uppercase px-3 py-1 rounded-full bg-[#FF1E8A] text-white mb-1.5">RONDA 1 DE 4 • MÁXIMO 10 PUNTOS</span>
+              <h2 id="roundTitle" class="font-game text-2xl sm:text-4xl font-bold text-white">Escenarios Estratégicos con PESTEL</h2>
+            </div>
+            <div class="bg-[#120324] border-2 border-white/20 rounded-2xl px-4 py-2.5 text-xs sm:text-sm max-w-xs">
+              <span class="font-bold text-[#FFE600]">👔 Don Alejandro (CEO):</span>
+              <span id="roundCeoQuote" class="text-white/90 italic block mt-0.5">"No quiero adivinos, quiero estrategas. ¿Qué variables macro pueden quebrar o disparar a Andina Motion en EE. UU.?"</span>
+            </div>
+          </div>
+
+          <!-- Context Box -->
+          <div id="roundContextBox" class="p-4 rounded-2xl bg-[#120324]/85 border-2 border-white/15 text-sm sm:text-base text-white/90 leading-relaxed"></div>
+
+          <!-- Interactive Form Controls for Current Round -->
+          <div id="roundInteractiveArea" class="space-y-5"></div>
+
+          <!-- Submit Button to CEO -->
+          <div class="pt-3 border-t-2 border-white/15 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div id="roundValidationMsg" class="text-xs sm:text-sm text-white/80 font-medium">
+              Completa todos los campos y espera a que concluyan los 7 minutos de análisis.
+            </div>
+            <button id="btnSubmitRound" type="button" disabled class="game-btn bg-[#FFE600] text-[#120324] font-bold text-base sm:text-lg px-7 py-4 flex items-center justify-center gap-2 shrink-0">
+              <span id="btnSubmitRoundIcon">🔒</span>
+              <span id="btnSubmitRoundText">Esperando 7 min de debate...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CEO EVALUATION + COUNTER-QUESTION CARD (Shown after submitting round) -->
+        <div id="ceoEvaluationCard" class="hidden game-card p-5 sm:p-8 border-[#FFE600] space-y-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-2 border-white/15 pb-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FFE600] to-[#FF6B00] border-3 border-[#120324] flex items-center justify-center text-4xl shrink-0 shadow-lg">
+                👔
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-[#FFE600] text-[#120324]">Veredicto del Directorio</span>
+                  <span id="evalSourceBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/15 text-white/90">IA Gemini / Rúbrica CEO</span>
+                </div>
+                <h3 class="font-game text-2xl sm:text-3xl text-white mt-1">Don Alejandro Vega — CEO</h3>
+              </div>
+            </div>
+
+            <!-- Score Medallion -->
+            <div class="bg-[#120324] border-3 border-[#FFE600] rounded-2xl px-5 py-3 text-center shrink-0 self-stretch sm:self-auto flex flex-col justify-center">
+              <div class="text-[11px] uppercase font-bold text-white/70">Puntaje Ronda</div>
+              <div class="font-game text-3xl sm:text-4xl font-bold text-[#FFE600] animate-pop"><span id="ceoRoundScore">8</span><span class="text-lg text-white/70">/10</span></div>
+            </div>
+          </div>
+
+          <!-- Praise, Critique & Blind Spot Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-400/60">
+              <div class="font-game text-emerald-300 text-base flex items-center gap-1.5 mb-1">
+                <span>👏</span> <span>Lo que me gustó (Elogio)</span>
+              </div>
+              <p id="ceoPraiseText" class="text-sm text-white/95 leading-relaxed"></p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-[#FF1E8A]/15 border-2 border-[#FF1E8A]/70">
+              <div class="font-game text-[#FF85B3] text-base flex items-center gap-1.5 mb-1">
+                <span>⚡</span> <span>Mi crítica directa</span>
+              </div>
+              <p id="ceoCritiqueText" class="text-sm text-white/95 leading-relaxed"></p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-[#FF6B00]/15 border-2 border-[#FF6B00]/70">
+              <div class="font-game text-[#FFB074] text-base flex items-center gap-1.5 mb-1">
+                <span>⚠️</span> <span>El riesgo que NO vieron</span>
+              </div>
+              <p id="ceoBlindSpotText" class="text-sm text-white/95 leading-relaxed"></p>
+            </div>
+          </div>
+
+          <!-- Mandatory Counter-Question Section (2:30 timer + 15 chars min) -->
+          <div class="p-5 rounded-2xl bg-[#120324] border-3 border-[#00F0FF] space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="font-game text-lg sm:text-xl text-[#00F0FF] flex items-center gap-2">
+                <span>🎯 CONTRAPREGUNTA DEL CEO (Obligatoria para avanzar)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-white/75">Desbloqueo en:</span>
+                <span id="counterClockDisplay" class="font-game text-lg font-bold px-3 py-0.5 rounded-lg bg-[#00F0FF]/20 text-[#00F0FF] border border-[#00F0FF]/40 tabular-nums">02:30</span>
+                <button id="btnQuickUnlockCounter" type="button" class="text-[11px] px-2 py-0.5 rounded bg-white/15 hover:bg-[#00F0FF] hover:text-[#120324] font-bold transition" title="Adelantar 2:30 para pruebas">⚡ Adelantar</button>
+              </div>
+            </div>
+
+            <blockquote id="ceoCounterQuestionText" class="p-3.5 rounded-xl bg-white/5 border-l-4 border-[#FFE600] text-base sm:text-lg font-semibold text-white italic"></blockquote>
+
+            <div>
+              <label for="inputCounterAnswer" class="block text-xs sm:text-sm font-bold text-white/90 mb-1.5">
+                Respuesta de defensa de la consultora (mínimo 15 caracteres + esperar 2:30 min de deliberación):
+              </label>
+              <textarea id="inputCounterAnswer" rows="3" placeholder="Escribe cómo mitigan este punto ciego y responden al CEO..." class="w-full p-3.5 rounded-xl bg-[#1E083E] border-2 border-white/30 text-white text-sm sm:text-base focus:outline-none focus:border-[#00F0FF]"></textarea>
+              <div class="flex items-center justify-between text-xs mt-1">
+                <span id="counterCharCount" class="text-white/70">0 / 15 caracteres mínimos</span>
+                <span id="counterTimerStatus" class="text-[#FFE600] font-bold">⏳ Deliberando respuesta (2:30 min)...</span>
+              </div>
+            </div>
+
+            <button id="btnSubmitCounterAnswer" type="button" disabled class="w-full game-btn bg-[#00F0FF] text-[#120324] font-bold text-base sm:text-lg py-4 px-6 flex items-center justify-center gap-2">
+              <span id="btnCounterIcon">🔒</span>
+              <span id="btnCounterText">Esperando 2:30 min y 15 caracteres...</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: FINAL CEO REPORT & 2-MIN PITCH     -->
+    <!-- ========================================== -->
+    <section id="viewFinalReport" class="hidden space-y-6">
+      <div class="game-card p-6 sm:p-8 border-[#FFE600] relative overflow-hidden">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b-2 border-white/15 pb-6">
+          <div>
+            <span class="inline-block text-xs font-bold uppercase px-3 py-1 rounded-full bg-[#00F0FF] text-[#120324] mb-2">AUDITORÍA COMPLETADA • 4 RONDAS</span>
+            <h1 class="font-game text-3xl sm:text-5xl font-bold text-white">Informe Final del CEO</h1>
+            <p class="text-sm sm:text-base text-white/85 mt-1">Consultora: <strong id="finalTeamName" class="text-[#FFE600]"></strong> (<span id="finalTeamRoom"></span>)</p>
+          </div>
+          <div class="bg-[#120324] border-4 border-[#FFE600] rounded-3xl px-6 py-4 text-center">
+            <div class="text-xs uppercase font-bold text-white/70">Puntaje Final Acumulado</div>
+            <div class="font-game text-4xl sm:text-5xl font-bold text-[#FFE600]"><span id="finalTotalScore">0</span><span class="text-xl text-white/60">/40</span></div>
+            <div id="finalRankBadge" class="text-xs font-bold text-[#00F0FF] mt-1">Consultora Senior</div>
+          </div>
+        </div>
+
+        <!-- CEO Executive Verdict -->
+        <div class="mt-6 p-5 rounded-2xl bg-[#120324]/90 border-2 border-[#FF1E8A] space-y-2">
+          <div class="font-game text-lg text-[#FF1E8A] flex items-center gap-2">
+            <span>👔</span> <span>Dictamen Ejecutivo de Don Alejandro Vega (CEO, Andina Motion S.A.)</span>
+          </div>
+          <p id="finalCeoSummaryText" class="text-sm sm:text-base text-white/95 leading-relaxed"></p>
+        </div>
+
+        <!-- 4 Rounds Summary Cards -->
+        <div id="finalRoundsBreakdown" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6"></div>
+
+        <!-- 2-MINUTE PITCH GUIDE & LIVE TIMER -->
+        <div class="mt-8 p-5 sm:p-7 rounded-3xl bg-gradient-to-br from-[#2B095E] via-[#1B053B] to-[#3B0A45] border-3 border-[#00F0FF] space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span class="text-xs font-bold uppercase px-2.5 py-1 rounded-full bg-[#FFE600] text-[#120324]">ETAPA PLENARIA EN MICROSOFT TEAMS</span>
+              <h2 class="font-game text-2xl sm:text-3xl text-white mt-1">🎤 Guía para tu Pitch de 2 Minutos</h2>
+              <p class="text-xs sm:text-sm text-white/80">Usen este guion personalizado con sus decisiones para defender su hoja de ruta ante los anfitriones (Paula, Caterin y Jorge) y demás consultoras.</p>
+            </div>
+
+            <!-- Interactive 2-Minute Pitch Stopwatch -->
+            <div class="bg-[#120324] border-2 border-[#00F0FF] rounded-2xl p-3 flex items-center gap-3 shrink-0">
+              <div id="pitchTimerDisplay" class="font-game text-3xl font-bold text-[#00F0FF] tabular-nums">02:00</div>
+              <div class="flex flex-col gap-1">
+                <button id="btnStartPitchTimer" type="button" class="game-btn bg-[#00F0FF] text-[#120324] text-xs font-bold px-3 py-1">▶ Iniciar 2:00</button>
+                <button id="btnResetPitchTimer" type="button" class="text-[11px] text-white/70 hover:text-white underline">Reiniciar</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="finalPitchGuideSteps" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <!-- Populated dynamically from the team's 4 answers -->
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <button id="btnBackToLobbyFromFinal" type="button" class="game-btn bg-white/15 text-white text-sm font-bold px-4 py-2.5">
+            ⬅ Volver al Inicio / Cambiar Equipo
+          </button>
+          <button id="btnCopyFinalReport" type="button" class="game-btn bg-[#FFE600] text-[#120324] text-sm font-bold px-5 py-2.5">
+            📋 Copiar Resumen para el Chat de Teams
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: HOST PANEL (?host=CLAVE)           -->
+    <!-- ========================================== -->
+    <section id="viewHost" class="hidden space-y-6">
+
+      <!-- Host Authentication Gate -->
+      <div id="hostAuthGate" class="max-w-md mx-auto game-card p-6 sm:p-8 border-[#FF1E8A] text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#FF1E8A]/20 border-2 border-[#FF1E8A] flex items-center justify-center text-3xl">👑</div>
+        <h2 class="font-game text-2xl sm:text-3xl text-white">Panel de Anfitriones: Paula, Caterin y Jorge</h2>
+        <p class="text-xs sm:text-sm text-white/80">
+          Acceso exclusivo mediante <code class="px-1.5 py-0.5 rounded bg-white/10 text-[#FFE600]">?host=CLAVE</code> más la contraseña de <strong>Paula, Caterin y Jorge</strong>. Los equipos no pueden ver este panel.
+        </p>
+        <form id="formHostLogin" class="space-y-3 text-left">
+          <div>
+            <label for="inputHostUrlKey" class="block text-xs font-bold text-white/80 mb-1">Código URL (<code class="text-[#00F0FF]">?host=</code>)</label>
+            <input id="inputHostUrlKey" type="text" value="CLAVE" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white font-mono text-sm" />
+          </div>
+          <div>
+            <label for="inputHostPassword" class="block text-xs font-bold text-white/80 mb-1">Contraseña de Anfitriones — Paula, Caterin y Jorge (Por defecto: <code class="text-[#FFE600]">ANDINA2025</code>)</label>
+            <input id="inputHostPassword" type="password" placeholder="Escribe la contraseña..." required class="w-full px-3.5 py-2.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white text-sm" />
+          </div>
+          <button type="submit" class="w-full game-btn bg-[#FF1E8A] text-white font-bold py-3 text-base">
+            🔓 Desbloquear Marcador en Vivo
+          </button>
+        </form>
+        <button id="btnCancelHostGate" type="button" class="text-xs text-white/70 hover:text-white underline">Volver a la vista de equipos</button>
+      </div>
+
+      <!-- Unlocked Host Dashboard -->
+      <div id="hostDashboardContent" class="hidden space-y-6 projector-scale">
+        <!-- Top Host Banner -->
+        <div class="game-card p-5 sm:p-6 border-[#00F0FF] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-[#FF1E8A] text-white text-xs font-bold uppercase">ANFITRIONES: PAULA, CATERIN Y JORGE • EN VIVO</span>
+              <span id="hostSyncIndicator" class="text-xs text-[#00F0FF] font-semibold">Sincronizado</span>
+            </div>
+            <h1 class="font-game text-2xl sm:text-4xl font-bold text-white mt-1">🏆 Panel de Control (Paula, Caterin y Jorge) — Ranking en Vivo</h1>
+            <p class="text-xs sm:text-sm text-white/80">Caso Andina Motion S.A. • Puntaje en tiempo real por ronda y auditoría de respuestas</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button id="btnProjectorMode" type="button" class="game-btn bg-[#FFE600] text-[#120324] font-bold px-4 py-2.5 text-sm flex items-center gap-1.5">
+              <span>📽️</span> <span id="projectorBtnText">Proyectar en Grande</span>
+            </button>
+            <button id="btnHostSeedDemo" type="button" class="hide-on-projector game-btn bg-[#00F0FF] text-[#120324] font-bold px-3.5 py-2.5 text-xs sm:text-sm">
+              ✨ Simular 4 Equipos
+            </button>
+            <button id="btnHostResetAll" type="button" class="hide-on-projector game-btn bg-red-600 text-white font-bold px-3.5 py-2.5 text-xs sm:text-sm">
+              🗑️ Reiniciar Sala
+            </button>
+            <button id="btnExitHostView" type="button" class="hide-on-projector game-btn bg-white/15 text-white font-bold px-3.5 py-2.5 text-xs sm:text-sm">
+              Salir
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Scoreboard Table with Medals -->
+        <div class="game-card p-4 sm:p-6 border-[#FFE600] overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b-2 border-white/20 text-xs sm:text-sm uppercase text-white/75">
+                <th class="py-3 px-3">Posición</th>
+                <th class="py-3 px-3">Consultora / Sala</th>
+                <th class="py-3 px-3 text-center">R1 PESTEL</th>
+                <th class="py-3 px-3 text-center">R2 Suministro</th>
+                <th class="py-3 px-3 text-center">R3 IA & Datos</th>
+                <th class="py-3 px-3 text-center">R4 Crisis</th>
+                <th class="py-3 px-3 text-right">Total / 40</th>
+                <th class="py-3 px-3 text-center hide-on-projector">Respuestas</th>
+              </tr>
+            </thead>
+            <tbody id="hostLeaderboardBody" class="divide-y divide-white/10 text-sm sm:text-base">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Detailed Team Responses Inspector -->
+        <div id="hostTeamResponsesSection" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="font-game text-xl sm:text-2xl text-[#00F0FF]">📋 Respuestas, Críticas del CEO y Contrapreguntas por Equipo</h2>
+            <span class="text-xs text-white/70">Haz clic en cualquier consultora para expandir sus 4 rondas</span>
+          </div>
+          <div id="hostTeamsAccordion" class="space-y-4">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CONFIG / TEACHER TEST TOOLS / API   -->
+  <!-- ========================================== -->
+  <div id="modalConfig" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="game-card max-w-2xl w-full p-5 sm:p-7 border-[#00F0FF] max-h-[90vh] overflow-y-auto space-y-5">
+      <div class="flex items-center justify-between border-b border-white/20 pb-3">
+        <h3 class="font-game text-xl sm:text-2xl text-[#00F0FF]">🛠️ Configuración Rápida y Modo Prueba Docente</h3>
+        <button id="btnCloseConfigModal" type="button" class="text-white/70 hover:text-white text-xl font-bold px-2">✕</button>
+      </div>
+
+      <!-- Fast testing switches -->
+      <div class="p-4 rounded-2xl bg-[#120324] border-2 border-[#FFE600] space-y-3">
+        <div class="font-game text-base text-[#FFE600]">⚡ Control de Relojes para Ensayo / Prueba</div>
+        <p class="text-xs text-white/80">
+          En clase real, los botones se bloquean durante <strong>7 minutos</strong> (ronda) y <strong>2:30 minutos</strong> (contrapregunta). Si estás probando el juego antes de clase, puedes desbloquear el reloj actual o activar el Modo Prueba Rápida (5 segundos).
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <button id="btnModalUnlockTimersNow" type="button" class="game-btn bg-[#FFE600] text-[#120324] text-xs font-bold px-3.5 py-2">
+            🔓 Desbloquear Reloj de la Ronda Actual Ahora
+          </button>
+          <button id="btnModalToggleFastMode" type="button" class="game-btn bg-[#FF1E8A] text-white text-xs font-bold px-3.5 py-2">
+            🚀 Modo Prueba Rápida (Relojes de 5 seg): <span id="fastModeStateText">OFF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Firebase Realtime Database URL or Google Apps Script URL -->
+      <div class="p-4 rounded-2xl bg-[#120324] border-2 border-white/20 space-y-3">
+        <div class="font-game text-base text-[#00F0FF]">🔥 Conexión en Vivo (Firebase Realtime Database / Apps Script)</div>
+        <p class="text-xs text-white/80">
+          Pega aquí la URL de tu <strong>Firebase Realtime Database</strong> (ej. <code class="text-[#FFE600]">https://tu-proyecto-default-rtdb.firebaseio.com</code>) o déjalo vacío para usar la sincronización local instantánea de demostración.
+        </p>
+        <input id="inputFirebaseDbUrl" type="url" placeholder="https://consultora-crisis-default-rtdb.firebaseio.com" class="w-full px-3.5 py-2 rounded-xl bg-[#1F0940] border border-white/30 text-white text-xs sm:text-sm font-mono" />
+      </div>
+
+      <!-- Gemini Proxy / API Configuration -->
+      <div class="p-4 rounded-2xl bg-[#120324] border-2 border-white/20 space-y-3">
+        <div class="font-game text-base text-[#FF1E8A]">🤖 Evaluación con IA (CEO Exigente Gemini + Rúbrica de Respaldo)</div>
+        <p class="text-xs text-white/80">
+          Para no exponer tu API Key en el código público, pega la URL de tu <strong>Proxy en Google Apps Script / Cloudflare Worker</strong>. Para pruebas personales en tu computador, también puedes pegar una clave temporal en memoria (si queda vacío o falla la red, el juego usa automáticamente la <strong>Rúbrica Inteligente del CEO</strong> sin interrumpir la clase).
+        </p>
+        <div class="space-y-2">
+          <input id="inputGeminiProxyUrl" type="url" placeholder="URL de tu Proxy seguro (Apps Script / Cloudflare Worker) - Recomendado" class="w-full px-3.5 py-2 rounded-xl bg-[#1F0940] border border-white/30 text-white text-xs sm:text-sm font-mono" />
+          <input id="inputGeminiApiKeyTemp" type="password" placeholder="Opcional solo para prueba local: Gemini API Key en sesión (AIza...)" class="w-full px-3.5 py-2 rounded-xl bg-[#1F0940] border border-white/30 text-white text-xs sm:text-sm font-mono" />
+        </div>
+      </div>
+
+      <!-- Host Password Customization -->
+      <div class="p-4 rounded-2xl bg-[#120324] border-2 border-white/20 space-y-2">
+        <div class="font-game text-base text-white">🔑 Contraseña de Anfitriones: Paula, Caterin y Jorge (<code class="text-[#FFE600]">?host=CLAVE</code>)</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="text-[11px] text-white/70">Parámetro ?host=</label>
+            <input id="inputConfigHostParam" type="text" value="CLAVE" class="w-full px-3 py-1.5 rounded-lg bg-[#1F0940] border border-white/30 text-white text-xs font-mono" />
+          </div>
+          <div>
+            <label class="text-[11px] text-white/70">Contraseña del panel</label>
+            <input id="inputConfigHostPass" type="text" value="ANDINA2025" class="w-full px-3 py-1.5 rounded-lg bg-[#1F0940] border border-white/30 text-white text-xs font-mono" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="btnSaveConfigModal" type="button" class="game-btn bg-[#00F0FF] text-[#120324] font-bold px-5 py-2.5 text-sm">
+          💾 Guardar Configuración
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * CONFIGURACIÓN PRINCIPAL (Editable aquí o desde el botón Config)
+     ********************************************************************/
+    const DEFAULT_CONFIG = {
+      // Si creas tu Firebase Realtime Database, pega aquí la URL base (ej. "https://mi-proyecto-default-rtdb.firebaseio.com")
+      firebaseDatabaseUrl: "",
+      // URL de tu proxy en Google Apps Script o Cloudflare Worker para llamar a Gemini sin exponer la API Key
+      geminiProxyUrl: "",
+      // Clave temporal solo en memoria si deseas probar directamente en local
+      geminiSessionApiKey: "",
+      // Clave de URL (?host=CLAVE) y contraseña para las anfitrionas
+      hostUrlParam: "CLAVE",
+      hostPassword: "ANDINA2025",
+      // Tiempos oficiales en segundos: Ronda = 15 min (900s), Bloqueo envío = 7 min (420s), Contrapregunta = 2:30 min (150s)
+      roundDurationSec: 15 * 60,
+      submitLockSec: 7 * 60,
+      counterLockSec: 150,
+      minCounterChars: 15,
+      fastTestMode: false
+    };
+
+    /********************************************************************
+     * DATOS DEL CASO: ANDINA MOTION S.A. (4 RONDAS)
+     ********************************************************************/
+    const PESTEL_OPTIONS = [
+      { id: "P1", cat: "Político", label: "Aranceles y tensiones comerciales EE. UU. vs. componentes asiáticos/latinos", icon: "🏛️" },
+      { id: "P2", cat: "Político", label: "Incentivos fiscales del Inflation Reduction Act (IRA) y subsidios estatales a e-bikes en EE. UU.", icon: "🇺🇸" },
+      { id: "E1", cat: "Económico", label: "Volatilidad de la tasa de cambio COP/USD y costo de financiamiento en dólares", icon: "💱" },
+      { id: "E2", cat: "Económico", label: "Inflación de fletes marítimos y cuellos de botella logísticos en puertos del Atlántico/Pacífico", icon: "🚢" },
+      { id: "S1", cat: "Social", label: "Auge de micromovilidad urbana y repartidores de última milla en ciudades de EE. UU.", icon: "🚴" },
+      { id: "T1", cat: "Tecnológico", label: "Disrupción en baterías de estado sólido y telemetría predictiva con IA", icon: "🔋" },
+      { id: "Ec1", cat: "Ecológico", label: "Exigencias de huella de carbono, reciclaje obligatorio de litio y economía circular", icon: "♻️" },
+      { id: "L1", cat: "Legal", label: "Certificación obligatoria de seguridad UL 2849 (CPSC EE. UU.) y demandas por incendios de baterías", icon: "⚖️" }
+    ];
+
+    const SUPPLY_CHAIN_OPTIONS = [
+      {
+        id: "offshoring",
+        title: "Offshoring en Asia (Shenzhen / Vietnam)",
+        badge: "Bajo Costo Unitario • Alto Riesgo Arancelario",
+        desc: "Producir celdas y motores a gran escala en Asia y exportar directo a EE. UU. Reduce el costo de manufactura un 28%, pero expone a aranceles de la Sección 301 y tiempos de tránsito de 35-45 días."
+      },
+      {
+        id: "nearshoring_mx",
+        title: "Nearshoring en México (Monterrey / Bajío)",
+        badge: "Frontera USMCA • Competencia por Talento",
+        desc: "Instalar planta de ensamblaje final en el norte de México para cruzar por tierra a Texas y California en 48 horas. Requiere fuerte inversión inicial (CAPEX) y cumplir reglas de origen T-MEC."
+      },
+      {
+        id: "nearshoring_mixto",
+        title: "Nearshoring Mixto (Colombia + Costa Rica)",
+        badge: "I+D y Motores en Colombia + Electrónica Limpia en C. Rica",
+        desc: "Diseño e ingeniería de motores en Medellín/Bogotá y empaquetado de baterías certificadas en zona franca de Costa Rica, aprovechando ambos TLC con EE. UU. (TPA y CAFTA-DR) y energía 99% renovable."
+      },
+      {
+        id: "friendshoring",
+        title: "Friendshoring (Alianza Andina-Norteamericana)",
+        badge: "Litio Aliado (Chile) + Ensamble Colombia + Pack final en EE. UU.",
+        desc: "Abastecimiento de minerales críticos de países con TLC con EE. UU. (Chile/Colombia) y ensamblaje final ligero en Florida para capturar subsidios 'Buy American' y blindarse ante bloqueos geopolíticos."
+      }
+    ];
+
+    const AI_GOVERNANCE_OPTIONS = [
+      {
+        id: "eeuu",
+        title: "Nube Exclusiva en EE. UU. (AWS / Virginia-Oregon)",
+        badge: "Baja Latencia en Destino • Sujeto a CLOUD Act",
+        desc: "Todos los datos de telemetría GPS, hábitos de frenado y salud de baterías de los ciclistas se procesan en servidores de EE. UU. Facilita alianzas comerciales allá, pero concentra el riesgo jurisdiccional."
+      },
+      {
+        id: "local_edge",
+        title: "Procesamiento Local en el Dispositivo (Edge AI en la E-Bike)",
+        badge: "Privacidad Máxima • Menor Visibilidad Central",
+        desc: "El microcontrolador del motor ejecuta el modelo predictivo sin subir recorridos personales a la nube; solo envía alertas anónimas de mantenimiento."
+      },
+      {
+        id: "hibrido",
+        title: "Arquitectura Híbrida Federada (Edge en EE. UU. + Nube Anonimizada en Colombia)",
+        badge: "Balance Soberanía & Cumplimiento Internacional",
+        desc: "Datos personales identificables quedan cifrados localmente en jurisdicción del usuario en EE. UU., mientras el entrenamiento global del algoritmo se hace con datos sintéticos/anonimizados en el centro de I+D de Colombia."
+      },
+      {
+        id: "colombia",
+        title: "Soberanía Total en Servidores de Colombia",
+        badge: "Control Corporativo • Reto de Transferencia Transfronteriza",
+        desc: "Centralizar toda la base de datos de usuarios estadounidenses e internacionales en servidores propios en Bogotá bajo Ley 1581 de 2012, asumiendo costos de latencia y auditorías de exportación de datos."
+      }
+    ];
+
+    const AMBIDEXTERITY_OPTIONS = [
+      {
+        id: "estructural",
+        title: "Ambidestreza Estructural (Unidades Separadas)",
+        badge: "Explotación vs. Exploración en Equipos Independientes",
+        desc: "Separar físicamente y con presupuestos independientes la operación actual (defender contratos y flujo de caja hoy) de una unidad comando ('Skunkworks') dedicada exclusivamente a rediseñar el producto/ruta ante la crisis."
+      },
+      {
+        id: "contextual",
+        title: "Ambidestreza Contextual (Autonomía en Primera Línea)",
+        badge: "Flexibilidad Cultural en Cada Colaborador",
+        desc: "Capacitar y dar autonomía a los mismos equipos de ingeniería, compras y ventas para que dividan su tiempo diariamente entre resolver la emergencia operativa y proponer mejoras incrementales sin crear nuevos silos."
+      },
+      {
+        id: "adaptativa",
+        title: "Estrategia Adaptativa Basada en Opciones Reales",
+        badge: "Pivote Modular y Contratos Contingentes",
+        desc: "Reconfigurar la entrada a EE. UU. mediante micro-experimentos, contratos de maquila flexibles y licenciamiento de patentes B2B para cambiar de canal o socio en semanas según evolucione el choque externo."
+      }
+    ];
+
+    /********************************************************************
+     * ESTADO GLOBAL DE LA APLICACIÓN
+     ********************************************************************/
+    let appConfig = loadSavedConfig();
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Estado de todos los equipos sincronizados: { [teamId]: TeamObject }
+    let allTeams = {};
+    let currentTeamId = null;
+    let currentRoundIndex = 1; // 1..4
+    let roundStage = "decision"; // "decision" | "counter" | "completed"
+
+    // Temporizadores en vivo
+    let roundInterval = null;
+    let roundElapsedSec = 0;
+    let counterInterval = null;
+    let counterElapsedSec = 0;
+    let pitchInterval = null;
+    let pitchRemainingSec = 120;
+
+    // Estado del formulario de la ronda actual
+    let selectedPestelIds = [];
+    let selectedSupplyOption = "";
+    let selectedAiDataLocation = "";
+    let selectedAmbidexterity = "";
+    let currentSurpriseCrisis = null;
+
+    // Estado del panel de anfitrionas
+    let hostUnlocked = false;
+    let projectorActive = false;
+    let expandedHostTeamIds = {};
+
+    // Canal de sincronización entre pestañas + almacenamiento local + Firebase REST
+    let broadcastChannel = null;
+    try {
+      if (typeof BroadcastChannel !== "undefined") {
+        broadcastChannel = new BroadcastChannel("consultora_en_crisis_sync_v1");
+        broadcastChannel.onmessage = (ev) => {
+          if (ev.data && ev.data.type === "SYNC_TEAMS") {
+            allTeams = ev.data.teams || {};
+            refreshAllViews();
+          }
+        };
+      }
+    } catch (e) {}
+
+    /********************************************************************
+     * UTILIDADES DE ALMACENAMIENTO Y SINCRONIZACIÓN (FIREBASE + LOCAL)
+     ********************************************************************/
+    function loadSavedConfig() {
+      let cfg = { ...DEFAULT_CONFIG };
+      try {
+        const raw = localStorage.getItem("crisis_app_config_v1");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          cfg = { ...cfg, ...parsed };
+        }
+      } catch (e) {}
+      return cfg;
+    }
+
+    function saveConfigToStorage() {
+      try {
+        localStorage.setItem("crisis_app_config_v1", JSON.stringify(appConfig));
+      } catch (e) {}
+    }
+
+    function loadTeamsFromLocal() {
+      try {
+        const raw = localStorage.getItem("crisis_teams_db_v1");
+        if (raw) {
+          allTeams = JSON.parse(raw) || {};
+        }
+      } catch (e) {
+        allTeams = {};
+      }
+    }
+
+    async function persistAndSyncTeams() {
+      try {
+        localStorage.setItem("crisis_teams_db_v1", JSON.stringify(allTeams));
+      } catch (e) {}
+
+      if (broadcastChannel) {
+        try {
+          broadcastChannel.postMessage({ type: "SYNC_TEAMS", teams: allTeams });
+        } catch (e) {}
+      }
+
+      // Si hay Firebase Realtime Database configurado, sincronizamos vía REST JSON
+      if (appConfig.firebaseDatabaseUrl && appConfig.firebaseDatabaseUrl.startsWith("https://")) {
+        const cleanBase = appConfig.firebaseDatabaseUrl.replace(/\/+$/, "");
+        try {
+          const fbUrl = cleanBase + "/consultora_en_crisis/teams.json";
+          await fetch(fbUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(allTeams)
+          });
+          updateSyncBadge("FIREBASE EN VIVO", true);
+        } catch (err) {
+          updateSyncBadge("MODO LOCAL (FALLÓ RED)", false);
+        }
+      } else {
+        updateSyncBadge("SINCRONIZADO", true);
+      }
+
+      refreshAllViews();
+    }
+
+    async function pollFirebaseIfConfigured() {
+      if (!appConfig.firebaseDatabaseUrl || !appConfig.firebaseDatabaseUrl.startsWith("https://")) return;
+      const cleanBase = appConfig.firebaseDatabaseUrl.replace(/\/+$/, "");
+      try {
+        const fbUrl = cleanBase + "/consultora_en_crisis/teams.json";
+        const res = await fetch(fbUrl);
+        if (res.ok) {
+          const remoteData = await res.json();
+          if (remoteData && typeof remoteData === "object") {
+            allTeams = remoteData;
+            try {
+              localStorage.setItem("crisis_teams_db_v1", JSON.stringify(allTeams));
+            } catch (e) {}
+            updateSyncBadge("FIREBASE EN VIVO", true);
+            refreshAllViews();
+          }
+        }
+      } catch (e) {}
+    }
+
+    function updateSyncBadge(text, ok) {
+      const badge = document.getElementById("syncBadge");
+      if (!badge) return;
+      badge.textContent = text;
+      badge.className = ok
+        ? "text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#00F0FF]/20 text-[#00F0FF] border border-[#00F0FF]/40"
+        : "text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#FF6B00]/20 text-[#FF6B00] border border-[#FF6B00]/40";
+    }
+
+    /********************************************************************
+     * EFECTOS DE SONIDO (WEB AUDIO API) Y CONFETI DE PUNTOS
+     ********************************************************************/
+    function playGameSound(type) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === "suspended") audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === "click") {
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(680, now + 0.07);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === "unlock") {
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.09);
+          osc.frequency.setValueAtTime(880, now + 0.18);
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === "score") {
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.1);
+          osc.frequency.setValueAtTime(783.99, now + 0.2);
+          osc.frequency.setValueAtTime(1046.5, now + 0.3);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+          osc.start(now);
+          osc.stop(now + 0.55);
+        }
+      } catch (e) {}
+    }
+
+    function launchScoreBurst(points) {
+      const layer = document.getElementById("fxLayer");
+      if (!layer) return;
+      const colors = ["#FF1E8A", "#FFE600", "#00F0FF", "#FF6B00", "#8B2CF5"];
+      for (let i = 0; i < 24; i++) {
+        const el = document.createElement("div");
+        const color = colors[i % colors.length];
+        el.style.position = "absolute";
+        el.style.left = `${45 + (Math.random() * 20 - 10)}%`;
+        el.style.top = "45%";
+        el.style.width = "12px";
+        el.style.height = "12px";
+        el.style.borderRadius = i % 2 === 0 ? "999px" : "3px";
+        el.style.backgroundColor = color;
+        el.style.transition = "transform 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s ease";
+        layer.appendChild(el);
+
+        const dx = (Math.random() - 0.5) * 420;
+        const dy = (Math.random() - 0.7) * 380;
+        requestAnimationFrame(() => {
+          el.style.transform = `translate(${dx}px, ${dy}px) rotate(${Math.random() * 360}deg)`;
+          el.style.opacity = "0";
+        });
+        setTimeout(() => el.remove(), 1050);
+      }
+
+      const floatingText = document.createElement("div");
+      floatingText.className = "font-game text-4xl sm:text-5xl font-bold text-[#FFE600] drop-shadow-[0_6px_0_#120324]";
+      floatingText.style.position = "absolute";
+      floatingText.style.left = "50%";
+      floatingText.style.top = "38%";
+      floatingText.style.transform = "translate(-50%, -50%)";
+      floatingText.style.transition = "all 1.1s ease-out";
+      floatingText.textContent = `+${points} PTS`;
+      layer.appendChild(floatingText);
+      requestAnimationFrame(() => {
+        floatingText.style.top = "22%";
+        floatingText.style.opacity = "0";
+      });
+      setTimeout(() => floatingText.remove(), 1150);
+    }
+
+    function showToast(message, tone = "info") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const bgMap = {
+        info: "bg-[#1E083E] border-[#00F0FF] text-white",
+        success: "bg-[#1E083E] border-[#FFE600] text-[#FFE600]",
+        warn: "bg-[#1E083E] border-[#FF1E8A] text-white"
+      };
+      const item = document.createElement("div");
+      item.className = `pointer-events-auto border-2 rounded-2xl px-4 py-3 shadow-xl text-xs sm:text-sm font-bold flex items-center justify-between gap-2 ${bgMap[tone] || bgMap.info}`;
+      item.innerHTML = `<span>${escapeHtml(message)}</span>`;
+      container.appendChild(item);
+      setTimeout(() => {
+        item.style.opacity = "0";
+        item.style.transition = "opacity 0.25s ease";
+        setTimeout(() => item.remove(), 260);
+      }, 3600);
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatMMSS(totalSeconds) {
+      const s = Math.max(0, Math.floor(totalSeconds));
+      const mins = Math.floor(s / 60);
+      const secs = s % 60;
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    /********************************************************************
+     * GENERADOR DE EVENTO SORPRESA EN RONDA 4 SEGÚN R1, R2 Y R3
+     ********************************************************************/
+    function generateSurpriseCrisisForTeam(team) {
+      const r2 = (team.rounds && team.rounds[2] && team.rounds[2].choiceId) || "nearshoring_mixto";
+      const r3 = (team.rounds && team.rounds[3] && team.rounds[3].choiceId) || "hibrido";
+      const r1Choices = (team.rounds && team.rounds[1] && team.rounds[1].choiceIds) || ["P1", "E1", "L1"];
+
+      // Personalizamos el choque de acuerdo con su cadena de suministro y soberanía de datos
+      if (r2 === "offshoring" || r2 === "nearshoring_mx") {
+        return {
+          code: "ARANCELES_Y_ADUANAS",
+          title: "🚨 CHOQUE ARANCELARIO DEL 25% Y BLOQUEO ADUANERO EN PUERTOS DE EE. UU.",
+          triggerReason: `Activado porque en la Ronda 2 eligieron "${r2 === "offshoring" ? "Offshoring en Asia" : "Nearshoring en México"}" y en la Ronda 1 priorizaron riesgos comerciales (${r1Choices.join(", ")}).`,
+          description: "El Departamento de Comercio de EE. UU. anuncia de madrugada una investigación antidumping y un arancel inmediato del 25% a motores y paquetes de litio ensamblados con insumos extrarregionales o en tránsito por pasos fronterizos saturados. 4.000 baterías de Andina Motion están retenidas en aduana y su distribuidor en California amenaza con cancelar la orden en 72 horas."
+        };
+      }
+
+      if (r3 === "eeuu" || r3 === "colombia") {
+        return {
+          code: "CIBERATAQUE_TELEMETRIA",
+          title: "🚨 CIBERATAQUE RANSOMWARE AL SERVIDOR CENTRAL DE BATERÍAS Y AUDITORÍA REGULATORIA",
+          triggerReason: `Activado porque en la Ronda 3 centralizaron los datos en "${r3 === "eeuu" ? "Nube exclusiva en EE. UU." : "Servidores centralizados en Colombia"}".`,
+          description: "Un grupo de hackers secuestra el panel de telemetría predictiva de Andina Motion, alterando las alertas de temperatura de 2.500 bicicletas eléctricas en pruebas piloto en Miami y Nueva York. Además, reguladores exigen demostrar en 48 horas quién responde legalmente por el algoritmo de gestión térmica para evitar el retiro forzoso del mercado."
+        };
+      }
+
+      return {
+        code: "CAMBIO_GOBIERNO_Y_LITIO",
+        title: "🚨 CAMBIO ABRUPTO DE REGLAS EN ZONAS FRANCAS Y CRISIS DE SUMINISTRO DE CELDAS",
+        triggerReason: `Activado por su combinación de "${r2 === "nearshoring_mixto" ? "Nearshoring Mixto (Colombia + Costa Rica)" : "Friendshoring"}" y arquitectura de datos "${r3}".`,
+        description: "Una reforma tributaria y regulatoria repentina modifica los incentivos de exportación en zonas francas andinas justo cuando el proveedor de celdas de litio sufre una huelga indefinida. Los costos logísticos suben 19% de golpe y el directorio de Andina Motion les exige decidir hoy cómo reorganizar a la empresa sin perder la ventana de entrada a EE. UU."
+      };
+    }
+
+    /********************************************************************
+     * MOTOR DE EVALUACIÓN: GEMINI API + RÚBRICA INTELIGENTE DEL CEO
+     ********************************************************************/
+    async function evaluateRoundSubmission(team, roundNum, payload) {
+      // 1. Intentar llamada a Proxy Seguro o Gemini API si fue configurado
+      const promptText = buildCeoEvaluationPrompt(team, roundNum, payload);
+
+      if (appConfig.geminiProxyUrl && appConfig.geminiProxyUrl.startsWith("https://")) {
+        try {
+          const resp = await fetch(appConfig.geminiProxyUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ roundNum, teamName: team.name, prompt: promptText, payload })
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data && typeof data.score === "number" && data.praise && data.critique && data.blindSpot && data.counterQuestion) {
+              return { ...data, source: "Gemini AI (Proxy Seguro)" };
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (appConfig.geminiSessionApiKey && appConfig.geminiSessionApiKey.trim().length > 15) {
+        try {
+          const apiKey = appConfig.geminiSessionApiKey.trim();
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+          const resp = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }],
+              generationConfig: { responseMimeType: "application/json", temperature: 0.5 }
+            })
+          });
+          if (resp.ok) {
+            const raw = await resp.json();
+            const textOut = raw?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textOut) {
+              const parsed = JSON.parse(textOut);
+              if (typeof parsed.score === "number" && parsed.praise && parsed.critique && parsed.blindSpot && parsed.counterQuestion) {
+                return {
+                  score: Math.max(0, Math.min(10, Math.round(parsed.score))),
+                  praise: parsed.praise,
+                  critique: parsed.critique,
+                  blindSpot: parsed.blindSpot,
+                  counterQuestion: parsed.counterQuestion,
+                  source: "Gemini AI (CEO en Vivo)"
+                };
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 2. Respaldo automático infalible: Rúbrica Inteligente del CEO Exigente
+      return evaluateWithSmartCeoRubric(team, roundNum, payload);
+    }
+
+    function buildCeoEvaluationPrompt(team, roundNum, payload) {
+      return `Actúa como Don Alejandro Vega, el exigente CEO de Andina Motion S.A. (empresa colombiana de motores y baterías para bicicletas eléctricas que busca entrar al mercado de EE. UU. en 5 años).
+Evalúa la respuesta de la consultora "${team.name}" en la Ronda ${roundNum} de 4.
+Datos enviados por el equipo: ${JSON.stringify(payload)}
+Devuelve EXCLUSIVAMENTE un objeto JSON con las claves exactas:
+{
+  "score": (entero de 0 a 10 según rigor técnico de comercio internacional, especificidad financiera/regulatoria y coherencia),
+  "praise": (1 párrafo corto en español destacando un acierto concreto de su propuesta),
+  "critique": (1 párrafo corto y exigente señalando qué quedó superficial o débil en su argumento),
+  "blindSpot": (el riesgo oculto o punto ciego específico que NO mencionaron),
+  "counterQuestion": (una pregunta incisiva que los obligue a tomar una decisión concreta en 2 minutos y medio)
+}`;
+    }
+
+    function evaluateWithSmartCeoRubric(team, roundNum, payload) {
+      const combinedText = (payload.mainText || "").toLowerCase();
+      const wordCount = combinedText.trim().split(/\s+/).filter(Boolean).length;
+
+      // Diccionario de conceptos clave de Comercio Internacional por ronda
+      const keywordsByRound = {
+        1: ["tlc", "arancel", "inflación", "tasa", "cambio", "dólar", "cop", "ul 2849", "litio", "subsidio", "ira", "puerto", "flete", "certificación", "cpsc", "batería", "interés"],
+        2: ["tlc", "reglas de origen", "lead time", "flete", "inventario", "arancel", "aduana", "capex", "zona franca", "costa rica", "méxico", "proveedores", "logística", "incoterms"],
+        3: ["ai act", "alto riesgo", "transparencia", "auditoría", "sesgo", "responsabilidad", "humano", "gdpr", "cloud act", "ley 1581", "cifrado", "anonimización", "telemetría"],
+        4: ["ambidestreza", "flujo de caja", "clientes", "explorar", "explotar", "contingencia", "pivote", "margen", "contrato", "liquidez", "reputación", "garantía"]
+      };
+
+      const roundKeywords = keywordsByRound[roundNum] || [];
+      let matchedKeywords = 0;
+      roundKeywords.forEach((kw) => {
+        if (combinedText.includes(kw)) matchedKeywords++;
+      });
+
+      // Cálculo riguroso de 0 a 10
+      let baseScore = 5;
+      if (wordCount >= 25) baseScore += 1;
+      if (wordCount >= 50) baseScore += 1;
+      if (wordCount >= 80) baseScore += 1;
+      if (matchedKeywords >= 2) baseScore += 1;
+      if (matchedKeywords >= 4) baseScore += 1;
+      if (wordCount < 12) baseScore = 4;
+
+      const score = Math.max(3, Math.min(10, baseScore));
+
+      if (roundNum === 1) {
+        const pickedLabels = (payload.choiceLabels || []).join(", ");
+        const mentionsCurrency = combinedText.includes("tasa") || combinedText.includes("dólar") || combinedText.includes("cop");
+        const mentionsUL = combinedText.includes("ul") || combinedText.includes("certific") || combinedText.includes("seguridad");
+        return {
+          score,
+          praise: `Destaco que su consultora haya seleccionado (${pickedLabels}) como ejes del PESTEL y haya contrastado un escenario optimista frente a uno pesimista pensando en nuestra ventana de 5 años hacia EE. UU.`,
+          critique: wordCount < 45
+            ? `Sus escenarios todavía parecen titulares de periódico y no un modelo de impacto en el estado de resultados (P&L) de Andina Motion.`
+            : `Aunque describen bien las tendencias macro, les faltó cuantificar qué porcentaje del margen bruto de nuestros motores e-bike se erosiona cuando el escenario pesimista se activa.`,
+          blindSpot: !mentionsUL
+            ? `No blindaron el riesgo regulatorio de la norma obligatoria UL 2849 de la CPSC en EE. UU.: sin esa certificación contra incendios de litio, ni Nueva York ni California permiten vender una sola batería.`
+            : (!mentionsCurrency
+              ? `Pasaron por alto el descalce cambiario: compramos celdas en dólares, fabricamos en pesos colombianos y daremos crédito a 60 días a distribuidores en EE. UU.`
+              : `No contemplaron la represalia de distribuidores locales en EE. UU. si las tasas de interés frenan el financiamiento al consumidor final de bicicletas eléctricas.`),
+          counterQuestion: `Si mañana el costo de certificar e importar nuestras baterías a EE. UU. sube un 18% por el escenario pesimista que describieron, ¿recortan el presupuesto de I+D en Colombia o suben el precio en EE. UU. arriesgando perder cuota inicial? Justifiquen con una cifra o regla clara.`,
+          source: "Rúbrica Ejecutiva CEO"
+        };
+      }
+
+      if (roundNum === 2) {
+        const opt = SUPPLY_CHAIN_OPTIONS.find((o) => o.id === payload.choiceId) || SUPPLY_CHAIN_OPTIONS[2];
+        return {
+          score,
+          praise: `Apostar por "${opt.title}" demuestra que entienden la urgencia de equilibrar tiempos de entrega hacia la costa este/oeste de EE. UU. con la estructura productiva de Andina Motion.`,
+          critique: matchedKeywords < 2
+            ? `Su justificación no profundiza en las Reglas de Origen del TLC ni en el capital de trabajo atrapado en inventario en tránsito.`
+            : `Defienden con fuerza la ubicación elegida, pero subestiman el costo de calificar proveedores de electrónica de potencia y el tiempo de curva de aprendizaje industrial.`,
+          blindSpot: payload.choiceId === "offshoring"
+            ? `Ignoraron el riesgo de detención aduanera en puertos de EE. UU. y los sobrearanceles repentinos de la Sección 301 que pueden borrar todo el ahorro asiático en una semana.`
+            : (payload.choiceId === "nearshoring_mx"
+              ? `No calcularon la rotación de ingenieros en el norte de México ni el requisito de transformación sustancial para no pagar arancel al cruzar a Texas.`
+              : `No previeron el cuello de botella en el transporte marítimo refrigerado para celdas de iones de litio (carga peligrosa IMO Clase 9) entre el Caribe y los puertos de Florida.`),
+          counterQuestion: `Un gran comprador minorista en EE. UU. nos pide 5.000 unidades con entrega garantizada en 21 días y penalidad del 15% por retraso. Bajo su modelo "${opt.title}", ¿dónde mantienen el stock de seguridad y cómo lo financian sin ahogar la caja de Andina Motion?`,
+          source: "Rúbrica Ejecutiva CEO"
+        };
+      }
+
+      if (roundNum === 3) {
+        const opt = AI_GOVERNANCE_OPTIONS.find((o) => o.id === payload.choiceId) || AI_GOVERNANCE_OPTIONS[2];
+        return {
+          score,
+          praise: `La elección de "${opt.title}" junto con su postura sobre responsabilidad algorítmica nos da una base clara para conversar con aseguradoras y reguladores internacionales.`,
+          critique: !combinedText.includes("ai act") && !combinedText.includes("riesgo")
+            ? `Mencionan el cumplimiento de forma general, pero el AI Act europeo clasifica los componentes de seguridad en movilidad como sistemas de Alto Riesgo que exigen trazabilidad técnica y supervisión humana documentada.`
+            : `Su esquema de gobernanza es sólido en el papel, pero no especifican quién tiene el botón de apagado ('kill-switch') cuando el modelo predictivo da un falso positivo en carretera.`,
+          blindSpot: `No definieron la responsabilidad civil cruzada entre el proveedor de nube, Andina Motion en Colombia y el distribuidor en EE. UU. si un fallo del algoritmo de gestión térmica provoca un accidente y un ciudadano europeo o estadounidense demanda a la empresa.`,
+          counterQuestion: `El algoritmo predictivo de Andina Motion recomienda bloquear preventivamente el 12% de las baterías vendidas en Miami por sospecha de sobrecalentamiento, pero el director comercial dice que eso destruirá las ventas del trimestre. ¿Quién tiene el poder de veto final y qué evidencia exige el AI Act para respaldar esa decisión?`,
+          source: "Rúbrica Ejecutiva CEO"
+        };
+      }
+
+      // Ronda 4
+      const opt = AMBIDEXTERITY_OPTIONS.find((o) => o.id === payload.choiceId) || AMBIDEXTERITY_OPTIONS[0];
+      return {
+        score,
+        praise: `Responder a la crisis "${payload.crisisTitle || "internacional"}" mediante "${opt.title}" muestra madurez directiva para no paralizar a Andina Motion en medio de la tormenta.`,
+        critique: wordCount < 45
+          ? `Frente a una crisis de esta magnitud, su plan de acción necesita responsables con cargo, plazos en días y asignación presupuestal exacta.`
+          : `El diseño organizacional que proponen tiene sentido teórico, pero puede generar fricción interna entre los equipos que defienden el mercado colombiano y los que abren EE. UU.`,
+        blindSpot: `Olvidaron proteger la moral y retención de los ingenieros clave de firmware y baterías durante la crisis: si nuestros líderes técnicos se van a la competencia mientras reorganizamos, nos quedamos sin producto en 6 meses.`,
+        counterQuestion: `Tienen solo $150.000 USD de liquidez de emergencia para los próximos 90 días bajo "${opt.title}". ¿Qué porcentaje exacto asignan a salvar los contratos actuales (explotación) y qué porcentaje a construir la solución definitiva (exploración), y qué indicador matará el proyecto si no funciona al día 60?`,
+        source: "Rúbrica Ejecutiva CEO"
+      };
+    }
+
+    /********************************************************************
+     * RENDERIZADO DE VISTAS Y NAVEGACIÓN
+     ********************************************************************/
+    function switchMainView(viewName) {
+      const views = ["viewLobby", "viewGame", "viewFinalReport", "viewHost"];
+      views.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle("hidden", id !== viewName);
+      });
+
+      const headerStatus = document.getElementById("headerTeamStatus");
+      if (headerStatus) {
+        if ((viewName === "viewGame" || viewName === "viewFinalReport") && currentTeamId && allTeams[currentTeamId]) {
+          headerStatus.classList.remove("hidden");
+          headerStatus.classList.add("flex");
+          document.getElementById("headerTeamName").textContent = allTeams[currentTeamId].name;
+          document.getElementById("headerTeamScore").textContent = calculateTeamTotalScore(allTeams[currentTeamId]);
+        } else {
+          headerStatus.classList.add("hidden");
+          headerStatus.classList.remove("flex");
+        }
+      }
+
+      const hostSwitchLabel = document.getElementById("btnSwitchHostLabel");
+      if (hostSwitchLabel) {
+        hostSwitchLabel.textContent = viewName === "viewHost" ? "Vista Equipos" : "Panel: Paula, Caterin y Jorge";
+      }
+    }
+
+    function calculateTeamTotalScore(team) {
+      if (!team || !team.rounds) return 0;
+      let sum = 0;
+      for (let r = 1; r <= 4; r++) {
+        if (team.rounds[r] && typeof team.rounds[r].score === "number") {
+          sum += team.rounds[r].score;
+        }
+      }
+      return sum;
+    }
+
+    function refreshAllViews() {
+      renderLobbyTeamsList();
+      if (currentTeamId && allTeams[currentTeamId]) {
+        const t = allTeams[currentTeamId];
+        const scoreEl = document.getElementById("headerTeamScore");
+        if (scoreEl) scoreEl.textContent = calculateTeamTotalScore(t);
+      }
+      if (!document.getElementById("viewHost").classList.contains("hidden") && hostUnlocked) {
+        renderHostDashboard();
+      }
+    }
+
+    function renderLobbyTeamsList() {
+      const listEl = document.getElementById("lobbyTeamsList");
+      const countEl = document.getElementById("lobbyTeamCount");
+      if (!listEl || !countEl) return;
+
+      const teamList = Object.values(allTeams).sort((a, b) => calculateTeamTotalScore(b) - calculateTeamTotalScore(a));
+      countEl.textContent = `${teamList.length} ${teamList.length === 1 ? "equipo" : "equipos"}`;
+
+      if (teamList.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-white/70 text-center">
+            Aún no hay consultoras registradas. ¡Sé el primer equipo en entrar o carga los 4 equipos de demostración!
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = teamList.map((t, idx) => {
+        const total = calculateTeamTotalScore(t);
+        const completedCount = Object.values(t.rounds || {}).filter((r) => r && r.counterSubmitted).length;
+        const statusLabel = completedCount >= 4 ? "✅ Finalizó (Pitch)" : `En Ronda ${Math.min(4, completedCount + 1)}/4`;
+        const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "🏅";
+        return `
+          <div class="p-3 rounded-xl bg-[#120324]/90 border-2 border-white/15 hover:border-[#00F0FF] transition flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="font-game text-sm sm:text-base text-white truncate">${medal} ${escapeHtml(t.name)}</div>
+              <div class="text-[11px] text-white/70">${escapeHtml(t.room || "Sala")} • <span class="text-[#00F0FF] font-semibold">${statusLabel}</span></div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="font-game text-base text-[#FFE600]">${total} pts</span>
+              <button type="button" data-resume-team="${escapeHtml(t.id)}" class="game-btn bg-[#00F0FF] text-[#120324] text-xs font-bold px-3 py-1.5">
+                Entrar ➔
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      listEl.querySelectorAll("[data-resume-team]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tid = btn.getAttribute("data-resume-team");
+          resumeTeamSession(tid);
+        });
+      });
+    }
+
+    /********************************************************************
+     * FLUJO DE JUEGO DE UN EQUIPO (RONDAS 1 A 4)
+     ********************************************************************/
+    function resumeTeamSession(teamId) {
+      const team = allTeams[teamId];
+      if (!team) return;
+      playGameSound("click");
+      currentTeamId = teamId;
+
+      // Determinar en qué ronda y etapa va el equipo
+      let nextRound = 1;
+      let nextStage = "decision";
+      for (let r = 1; r <= 4; r++) {
+        const rData = team.rounds && team.rounds[r];
+        if (!rData || !rData.decisionSubmitted) {
+          nextRound = r;
+          nextStage = "decision";
+          break;
+        } else if (!rData.counterSubmitted) {
+          nextRound = r;
+          nextStage = "counter";
+          break;
+        } else if (r === 4 && rData.counterSubmitted) {
+          nextRound = 5;
+          nextStage = "completed";
+        }
+      }
+
+      if (nextStage === "completed") {
+        stopAllRoundTimers();
+        renderFinalReportView();
+        switchMainView("viewFinalReport");
+      } else {
+        currentRoundIndex = nextRound;
+        roundStage = nextStage;
+        switchMainView("viewGame");
+        loadRoundScreen(currentRoundIndex, roundStage);
+      }
+    }
+
+    function loadRoundScreen(roundNum, stage) {
+      stopAllRoundTimers();
+      const team = allTeams[currentTeamId];
+      if (!team) return;
+
+      // Aplicar color temático distinto por ronda
+      const themeContainer = document.getElementById("roundThemeContainer");
+      themeContainer.className = `theme-r${roundNum} space-y-5`;
+
+      // Actualizar Stepper
+      const colorsByRound = {
+        1: "bg-[#FF1E8A] border-[#FF1E8A] text-white",
+        2: "bg-[#00F0FF] border-[#00F0FF] text-[#120324]",
+        3: "bg-[#FFE600] border-[#FFE600] text-[#120324]",
+        4: "bg-[#FF6B00] border-[#FF6B00] text-[#120324]"
+      };
+      for (let i = 1; i <= 5; i++) {
+        const pill = document.getElementById(`stepPill${i}`);
+        if (!pill) continue;
+        if (i < roundNum) {
+          pill.className = "px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2 bg-emerald-500/25 border-emerald-400 text-emerald-200";
+        } else if (i === roundNum) {
+          pill.className = `px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2 ${colorsByRound[roundNum]} shadow-md`;
+        } else {
+          pill.className = "px-3 py-1.5 rounded-xl font-game text-xs sm:text-sm font-bold border-2 bg-white/5 border-white/20 text-white/60";
+        }
+      }
+
+      // Configurar encabezado y formulario según la ronda
+      const badgeEl = document.getElementById("roundBadgeLabel");
+      const titleEl = document.getElementById("roundTitle");
+      const quoteEl = document.getElementById("roundCeoQuote");
+      const contextEl = document.getElementById("roundContextBox");
+      const areaEl = document.getElementById("roundInteractiveArea");
+
+      const badgeColors = {
+        1: "bg-[#FF1E8A] text-white",
+        2: "bg-[#00F0FF] text-[#120324]",
+        3: "bg-[#FFE600] text-[#120324]",
+        4: "bg-[#FF6B00] text-[#120324]"
+      };
+      badgeEl.className = `inline-block text-xs font-bold uppercase px-3 py-1 rounded-full mb-1.5 ${badgeColors[roundNum]}`;
+      badgeEl.textContent = `RONDA ${roundNum} DE 4 • MÁXIMO 10 PUNTOS`;
+
+      if (roundNum === 1) {
+        titleEl.textContent = "1. Escenarios Estratégicos con PESTEL";
+        quoteEl.textContent = '"Elijan 3 incertidumbres críticas reales y demuéstrenme cómo sobrevive Andina Motion tanto en el cielo como en el infierno macroeconómico."';
+        contextEl.innerHTML = `
+          <strong>Contexto Ronda 1:</strong> Andina Motion S.A. ensambla en Colombia motores de tracción media y baterías de litio de 48V para bicicletas urbanas y de carga. Su meta es facturar <strong>$18M USD anuales en Estados Unidos en 5 años</strong>. Antes de invertir un dólar, el directorio les exige seleccionar <strong>exactamente 3 incertidumbres críticas PESTEL</strong> y redactar el <strong>Escenario Optimista</strong> y el <strong>Escenario Pesimista</strong>.
+        `;
+        selectedPestelIds = (team.rounds?.[1]?.choiceIds) ? [...team.rounds[1].choiceIds] : [];
+        const savedOpt = team.rounds?.[1]?.optimisticText || "";
+        const savedPes = team.rounds?.[1]?.pessimisticText || "";
+
+        areaEl.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-sm sm:text-base font-bold text-white">Paso A: Selecciona exactamente 3 incertidumbres críticas PESTEL (<span id="pestelCountLabel" class="text-[#FFE600]">${selectedPestelIds.length}/3</span>)</label>
+            </div>
+            <div id="pestelGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              ${PESTEL_OPTIONS.map((item) => {
+                const isSel = selectedPestelIds.includes(item.id);
+                return `
+                  <button type="button" data-pestel-id="${item.id}" class="choice-pill p-3.5 text-left flex items-start gap-3 ${isSel ? "selected" : ""}">
+                    <span class="text-2xl shrink-0">${item.icon}</span>
+                    <div>
+                      <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded bg-white/15 text-[#FFE600]">${item.cat}</span>
+                      <div class="text-xs sm:text-sm font-semibold text-white mt-1 leading-snug">${escapeHtml(item.label)}</div>
+                    </div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="inputR1Optimistic" class="block text-sm font-bold text-emerald-300 mb-1.5">🌤️ Escenario Optimista (5 años en EE. UU.) *</label>
+              <textarea id="inputR1Optimistic" rows="4" placeholder="Describe cómo se combinan tus 3 variables en un escenario favorable y qué ventaja captura Andina Motion..." class="w-full p-3.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white text-sm sm:text-base focus:outline-none focus:border-[#FF1E8A]">${escapeHtml(savedOpt)}</textarea>
+            </div>
+            <div>
+              <label for="inputR1Pessimistic" class="block text-sm font-bold text-[#FF85B3] mb-1.5">⛈️ Escenario Pesimista + Plan de Mitigación *</label>
+              <textarea id="inputR1Pessimistic" rows="4" placeholder="Describe qué pasa si tus 3 incertidumbres juegan en contra al mismo tiempo y cómo protegerán el flujo de caja..." class="w-full p-3.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white text-sm sm:text-base focus:outline-none focus:border-[#FF1E8A]">${escapeHtml(savedPes)}</textarea>
+            </div>
+          </div>
+        `;
+
+        areaEl.querySelectorAll("[data-pestel-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (roundStage !== "decision") return;
+            const pid = btn.getAttribute("data-pestel-id");
+            if (selectedPestelIds.includes(pid)) {
+              selectedPestelIds = selectedPestelIds.filter((x) => x !== pid);
+            } else {
+              if (selectedPestelIds.length >= 3) {
+                showToast("Ya elegiste 3 incertidumbres. Desmarca una si deseas cambiarla.", "warn");
+                return;
+              }
+              selectedPestelIds.push(pid);
+            }
+            playGameSound("click");
+            areaEl.querySelectorAll("[data-pestel-id]").forEach((b) => {
+              const id = b.getAttribute("data-pestel-id");
+              b.classList.toggle("selected", selectedPestelIds.includes(id));
+            });
+            document.getElementById("pestelCountLabel").textContent = `${selectedPestelIds.length}/3`;
+            updateSubmitButtonState();
+          });
+        });
+
+        document.getElementById("inputR1Optimistic").addEventListener("input", updateSubmitButtonState);
+        document.getElementById("inputR1Pessimistic").addEventListener("input", updateSubmitButtonState);
+
+      } else if (roundNum === 2) {
+        titleEl.textContent = "2. Arquitectura de Cadena de Suministro";
+        quoteEl.textContent = '"¿Dónde vamos a producir y ensamblar para entrar a EE. UU. sin que los aranceles o los fletes nos devoren el margen?"';
+        contextEl.innerHTML = `
+          <strong>Contexto Ronda 2:</strong> Actualmente el 70% de las celdas vienen de Asia y los motores se arman en Colombia. Para escalar a 25.000 unidades/año en EE. UU., elijan <strong>una estrategia de localización industrial</strong> y justifiquen su decisión evaluando: <strong>costos, tiempos de entrega (lead time), reglas de origen de TLC y resiliencia geopolítica</strong>.
+        `;
+        selectedSupplyOption = team.rounds?.[2]?.choiceId || "";
+        const savedJust = team.rounds?.[2]?.justification || "";
+
+        areaEl.innerHTML = `
+          <div>
+            <label class="block text-sm sm:text-base font-bold text-white mb-2">Paso A: Elige la configuración de Cadena de Suministro *</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              ${SUPPLY_CHAIN_OPTIONS.map((opt) => {
+                const isSel = selectedSupplyOption === opt.id;
+                return `
+                  <button type="button" data-supply-id="${opt.id}" class="choice-pill p-4 text-left flex flex-col justify-between ${isSel ? "selected" : ""}">
+                    <div>
+                      <div class="text-xs font-bold text-[#00F0FF] uppercase">${escapeHtml(opt.badge)}</div>
+                      <div class="font-game text-lg text-white mt-0.5">${escapeHtml(opt.title)}</div>
+                      <p class="text-xs sm:text-sm text-white/80 mt-1.5 leading-relaxed">${escapeHtml(opt.desc)}</p>
+                    </div>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div>
+            <label for="inputR2Justification" class="block text-sm font-bold text-[#00F0FF] mb-1.5">Paso B: Justificación ejecutiva ante el CEO (costos, TLC/reglas de origen, lead time y mitigación) *</label>
+            <textarea id="inputR2Justification" rows="4" placeholder="Explica por qué esta ruta supera a las otras 3 opciones para vender en EE. UU. en 5 años..." class="w-full p-3.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white text-sm sm:text-base focus:outline-none focus:border-[#00F0FF]">${escapeHtml(savedJust)}</textarea>
+          </div>
+        `;
+
+        areaEl.querySelectorAll("[data-supply-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (roundStage !== "decision") return;
+            selectedSupplyOption = btn.getAttribute("data-supply-id");
+            playGameSound("click");
+            areaEl.querySelectorAll("[data-supply-id]").forEach((b) => {
+              b.classList.toggle("selected", b.getAttribute("data-supply-id") === selectedSupplyOption);
+            });
+            updateSubmitButtonState();
+          });
+        });
+        document.getElementById("inputR2Justification").addEventListener("input", updateSubmitButtonState);
+
+      } else if (roundNum === 3) {
+        titleEl.textContent = "3. Gobernanza de IA y Soberanía de Datos";
+        quoteEl.textContent = '"Nuestras baterías usan IA para predecir fallos térmicos y rutas de ciclistas en EE. UU. Si el algoritmo falla, ¿dónde están los datos y quién da la cara ante la ley?"';
+        contextEl.innerHTML = `
+          <strong>Contexto Ronda 3:</strong> El nuevo sistema <em>AndinaSmart BMS</em> recolecta GPS, telemetría térmica y patrones de carga de cada usuario en EE. UU., además de exportar lotes a distribuidores con filiales europeas. Elijan <strong>dónde alojar y procesar los datos</strong> y expliquen: <strong>(1) quién responde legal y operativamente por las decisiones del algoritmo</strong> y <strong>(2) cómo garantizan el cumplimiento del AI Act europeo (sistemas de alto riesgo en movilidad)</strong>.
+        `;
+        selectedAiDataLocation = team.rounds?.[3]?.choiceId || "";
+        const savedAccountability = team.rounds?.[3]?.accountabilityText || "";
+        const savedAiAct = team.rounds?.[3]?.aiActText || "";
+
+        areaEl.innerHTML = `
+          <div>
+            <label class="block text-sm sm:text-base font-bold text-white mb-2">Paso A: Elige dónde guardar y procesar los datos de telemetría *</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              ${AI_GOVERNANCE_OPTIONS.map((opt) => {
+                const isSel = selectedAiDataLocation === opt.id;
+                return `
+                  <button type="button" data-ai-id="${opt.id}" class="choice-pill p-4 text-left ${isSel ? "selected" : ""}">
+                    <div class="text-xs font-bold text-[#FFE600] uppercase">${escapeHtml(opt.badge)}</div>
+                    <div class="font-game text-lg text-white mt-0.5">${escapeHtml(opt.title)}</div>
+                    <p class="text-xs sm:text-sm text-white/80 mt-1.5 leading-relaxed">${escapeHtml(opt.desc)}</p>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="inputR3Accountability" class="block text-sm font-bold text-[#FFE600] mb-1.5">Paso B: ¿Quién responde por el algoritmo y cuál es el protocolo ante fallos? *</label>
+              <textarea id="inputR3Accountability" rows="4" placeholder="Define la cadena de responsabilidad (comité de ética/seguridad, supervisión humana 'human-in-the-loop', seguros)..." class="w-full p-3.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white text-sm sm:text-base focus:outline-none focus:border-[#FFE600]">${escapeHtml(savedAccountability)}</textarea>
+            </div>
+            <div>
+              <label for="inputR3AiAct" class="block text-sm font-bold text-[#00F0FF] mb-1.5">Paso C: ¿Cómo cumplen con el AI Act Europeo y estándares internacionales? *</label>
+              <textarea id="inputR3AiAct" rows="4" placeholder="Explica cómo cumplen requisitos de sistemas de alto riesgo (auditoría de datos, transparencia, registro de logs, ciberseguridad)..." class="w-full p-3.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white text-sm sm:text-base focus:outline-none focus:border-[#FFE600]">${escapeHtml(savedAiAct)}</textarea>
+            </div>
+          </div>
+        `;
+
+        areaEl.querySelectorAll("[data-ai-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (roundStage !== "decision") return;
+            selectedAiDataLocation = btn.getAttribute("data-ai-id");
+            playGameSound("click");
+            areaEl.querySelectorAll("[data-ai-id]").forEach((b) => {
+              b.classList.toggle("selected", b.getAttribute("data-ai-id") === selectedAiDataLocation);
+            });
+            updateSubmitButtonState();
+          });
+        });
+        document.getElementById("inputR3Accountability").addEventListener("input", updateSubmitButtonState);
+        document.getElementById("inputR3AiAct").addEventListener("input", updateSubmitButtonState);
+
+      } else if (roundNum === 4) {
+        currentSurpriseCrisis = generateSurpriseCrisisForTeam(team);
+        titleEl.textContent = "4. Evento Sorpresa y Ambidestreza Organizacional";
+        quoteEl.textContent = '"¡Alerta roja! Sus decisiones de las rondas 1, 2 y 3 acaban de detonar una crisis en vivo. Demuéstrenme cómo responden sin abandonar la meta en EE. UU."';
+        contextEl.innerHTML = `
+          <div class="space-y-2">
+            <div class="inline-block text-xs font-bold uppercase px-2.5 py-0.5 rounded bg-[#FF6B00] text-[#120324]">${escapeHtml(currentSurpriseCrisis.triggerReason)}</div>
+            <div class="font-game text-lg sm:text-xl text-[#FFE600]">${escapeHtml(currentSurpriseCrisis.title)}</div>
+            <p class="text-sm sm:text-base text-white/95">${escapeHtml(currentSurpriseCrisis.description)}</p>
+          </div>
+        `;
+        selectedAmbidexterity = team.rounds?.[4]?.choiceId || "";
+        const savedPlan = team.rounds?.[4]?.actionPlan || "";
+
+        areaEl.innerHTML = `
+          <div>
+            <label class="block text-sm sm:text-base font-bold text-white mb-2">Paso A: Elige el enfoque de respuesta organizacional *</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              ${AMBIDEXTERITY_OPTIONS.map((opt) => {
+                const isSel = selectedAmbidexterity === opt.id;
+                return `
+                  <button type="button" data-ambi-id="${opt.id}" class="choice-pill p-4 text-left ${isSel ? "selected" : ""}">
+                    <div class="text-xs font-bold text-[#FF6B00] uppercase">${escapeHtml(opt.badge)}</div>
+                    <div class="font-game text-lg text-white mt-0.5">${escapeHtml(opt.title)}</div>
+                    <p class="text-xs sm:text-sm text-white/80 mt-1.5 leading-relaxed">${escapeHtml(opt.desc)}</p>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div>
+            <label for="inputR4ActionPlan" class="block text-sm font-bold text-[#FF6B00] mb-1.5">Paso B: Plan de Choque de 90 días (cómo combinan explotar el negocio actual y explorar la salida a la crisis) *</label>
+            <textarea id="inputR4ActionPlan" rows="4" placeholder="Detalla qué hace cada equipo en las próximas 72 horas y 90 días, cómo protegen a los clientes en EE. UU. y cómo financian la maniobra..." class="w-full p-3.5 rounded-xl bg-[#120324] border-2 border-white/25 text-white text-sm sm:text-base focus:outline-none focus:border-[#FF6B00]">${escapeHtml(savedPlan)}</textarea>
+          </div>
+        `;
+
+        areaEl.querySelectorAll("[data-ambi-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (roundStage !== "decision") return;
+            selectedAmbidexterity = btn.getAttribute("data-ambi-id");
+            playGameSound("click");
+            areaEl.querySelectorAll("[data-ambi-id]").forEach((b) => {
+              b.classList.toggle("selected", b.getAttribute("data-ambi-id") === selectedAmbidexterity);
+            });
+            updateSubmitButtonState();
+          });
+        });
+        document.getElementById("inputR4ActionPlan").addEventListener("input", updateSubmitButtonState);
+      }
+
+      const evalCard = document.getElementById("ceoEvaluationCard");
+      if (stage === "decision") {
+        evalCard.classList.add("hidden");
+        startRoundDecisionTimer();
+        updateSubmitButtonState();
+      } else if (stage === "counter") {
+        // Mostrar la evaluación ya guardada y activar el reloj de contrapregunta
+        const savedRound = team.rounds[roundNum];
+        renderCeoEvaluationCard(savedRound.evaluation, savedRound.counterAnswer || "");
+        startCounterQuestionTimer();
+      }
+    }
+
+    /********************************************************************
+     * CONTROL ESTRICTO DE TIEMPOS (15 MIN RONDA / 7 MIN BLOQUEO / 2:30 CONTRAPREGUNTA)
+     ********************************************************************/
+    function stopAllRoundTimers() {
+      if (roundInterval) {
+        clearInterval(roundInterval);
+        roundInterval = null;
+      }
+      if (counterInterval) {
+        clearInterval(counterInterval);
+        counterInterval = null;
+      }
+    }
+
+    function getEffectiveTimings() {
+      if (appConfig.fastTestMode) {
+        return { roundTotal: 900, submitLock: 5, counterLock: 5 };
+      }
+      return {
+        roundTotal: appConfig.roundDurationSec || 900,
+        submitLock: appConfig.submitLockSec || 420,
+        counterLock: appConfig.counterLockSec || 150
+      };
+    }
+
+    function startRoundDecisionTimer() {
+      stopAllRoundTimers();
+      roundElapsedSec = 0;
+      updateRoundTimerUI();
+
+      roundInterval = setInterval(() => {
+        roundElapsedSec++;
+        const { submitLock } = getEffectiveTimings();
+        if (roundElapsedSec === submitLock) {
+          playGameSound("unlock");
+          showToast("🔓 ¡7 minutos cumplidos! Ya pueden enviar su propuesta al CEO.", "success");
+        }
+        updateRoundTimerUI();
+        updateSubmitButtonState();
+      }, 1000);
+    }
+
+    function updateRoundTimerUI() {
+      const { roundTotal, submitLock } = getEffectiveTimings();
+      const remainingRound = Math.max(0, roundTotal - roundElapsedSec);
+      const remainingLock = Math.max(0, submitLock - roundElapsedSec);
+
+      const clockEl = document.getElementById("roundClockDisplay");
+      const lockHintEl = document.getElementById("roundLockHint");
+      const unlockCountdownEl = document.getElementById("submitUnlockCountdown");
+      const unlockStatusEl = document.getElementById("submitUnlockStatusText");
+      const fillEl = document.getElementById("submitUnlockProgressFill");
+
+      if (clockEl) {
+        clockEl.textContent = formatMMSS(remainingRound);
+        clockEl.classList.toggle("timer-urgent", remainingRound <= 120 && remainingRound > 0);
+        clockEl.classList.toggle("text-[#FF1E8A]", remainingRound <= 120);
+      }
+
+      const pct = Math.min(100, Math.round((roundElapsedSec / Math.max(1, submitLock)) * 100));
+      if (fillEl) fillEl.style.width = `${pct}%`;
+
+      if (remainingLock > 0) {
+        if (lockHintEl) {
+          lockHintEl.textContent = `🔒 Envío bloqueado por ${formatMMSS(remainingLock)} más`;
+          lockHintEl.className = "text-xs font-bold text-[#FFE600]";
+        }
+        if (unlockCountdownEl) unlockCountdownEl.textContent = `Faltan ${formatMMSS(remainingLock)}`;
+        if (unlockStatusEl) {
+          unlockStatusEl.textContent = appConfig.fastTestMode
+            ? "⚡ Modo Prueba Rápida activo (desbloqueo en 5 seg)"
+            : "⏳ Tiempo mínimo obligatorio de análisis (7:00 min antes de habilitar el botón)";
+        }
+      } else {
+        if (lockHintEl) {
+          lockHintEl.textContent = "🔓 ¡Envío habilitado!";
+          lockHintEl.className = "text-xs font-bold text-emerald-300";
+        }
+        if (unlockCountdownEl) unlockCountdownEl.textContent = "¡DESBLOQUEADO!";
+        if (unlockStatusEl) unlockStatusEl.textContent = "✅ Tiempo mínimo de discusión cumplido. Pueden enviar cuando estén listos.";
+      }
+    }
+
+    function checkRoundFormComplete() {
+      if (currentRoundIndex === 1) {
+        const opt = (document.getElementById("inputR1Optimistic")?.value || "").trim();
+        const pes = (document.getElementById("inputR1Pessimistic")?.value || "").trim();
+        return selectedPestelIds.length === 3 && opt.length >= 15 && pes.length >= 15;
+      }
+      if (currentRoundIndex === 2) {
+        const just = (document.getElementById("inputR2Justification")?.value || "").trim();
+        return Boolean(selectedSupplyOption) && just.length >= 15;
+      }
+      if (currentRoundIndex === 3) {
+        const acc = (document.getElementById("inputR3Accountability")?.value || "").trim();
+        const aiAct = (document.getElementById("inputR3AiAct")?.value || "").trim();
+        return Boolean(selectedAiDataLocation) && acc.length >= 15 && aiAct.length >= 15;
+      }
+      if (currentRoundIndex === 4) {
+        const plan = (document.getElementById("inputR4ActionPlan")?.value || "").trim();
+        return Boolean(selectedAmbidexterity) && plan.length >= 15;
+      }
+      return false;
+    }
+
+    function updateSubmitButtonState() {
+      const btn = document.getElementById("btnSubmitRound");
+      const icon = document.getElementById("btnSubmitRoundIcon");
+      const text = document.getElementById("btnSubmitRoundText");
+      const msg = document.getElementById("roundValidationMsg");
+      if (!btn || !icon || !text || !msg) return;
+
+      if (roundStage !== "decision") {
+        btn.disabled = true;
+        icon.textContent = "✅";
+        text.textContent = "Respuesta enviada al CEO";
+        msg.textContent = "Responde la contrapregunta del CEO abajo para desbloquear la siguiente ronda.";
+        return;
+      }
+
+      const { submitLock } = getEffectiveTimings();
+      const remainingLock = Math.max(0, submitLock - roundElapsedSec);
+      const isFormReady = checkRoundFormComplete();
+
+      if (remainingLock > 0) {
+        btn.disabled = true;
+        icon.textContent = "🔒";
+        text.textContent = `Habilitado en ${formatMMSS(remainingLock)}`;
+        msg.textContent = isFormReady
+          ? "✅ Propuesta redactada. Aprovechen los minutos restantes para pulir cifras antes de que se abra el envío."
+          : "Completen la selección y justificación mientras corre el reloj obligatorio de 7 minutos.";
+      } else if (!isFormReady) {
+        btn.disabled = true;
+        icon.textContent = "✍️";
+        text.textContent = "Completa todos los campos";
+        msg.textContent = "El reloj de 7 minutos ya se cumplió, pero faltan opciones por elegir o desarrollar (mín. 15 caracteres).";
+      } else {
+        btn.disabled = false;
+        icon.textContent = "🚀";
+        text.textContent = "¡ENVIAR DECISIÓN AL CEO!";
+        msg.textContent = "🔓 Reloj y campos listos. El CEO evaluará su propuesta de 0 a 10 puntos.";
+      }
+    }
+
+    async function handleRoundSubmit() {
+      if (roundStage !== "decision") return;
+      const { submitLock } = getEffectiveTimings();
+      if (roundElapsedSec < submitLock || !checkRoundFormComplete()) return;
+
+      const team = allTeams[currentTeamId];
+      if (!team) return;
+
+      const btn = document.getElementById("btnSubmitRound");
+      const text = document.getElementById("btnSubmitRoundText");
+      btn.disabled = true;
+      text.textContent = "Consultando al CEO...";
+      playGameSound("click");
+
+      // Construir payload de la ronda
+      let roundPayload = {};
+      if (currentRoundIndex === 1) {
+        const opt = document.getElementById("inputR1Optimistic").value.trim();
+        const pes = document.getElementById("inputR1Pessimistic").value.trim();
+        const labels = selectedPestelIds.map((id) => PESTEL_OPTIONS.find((p) => p.id === id)?.label || id);
+        roundPayload = {
+          choiceIds: [...selectedPestelIds],
+          choiceLabels: labels,
+          optimisticText: opt,
+          pessimisticText: pes,
+          summaryChoice: `3 Incertidumbres PESTEL: ${selectedPestelIds.join(", ")}`,
+          mainText: `Optimista: ${opt} | Pesimista: ${pes}`
+        };
+      } else if (currentRoundIndex === 2) {
+        const just = document.getElementById("inputR2Justification").value.trim();
+        const optObj = SUPPLY_CHAIN_OPTIONS.find((o) => o.id === selectedSupplyOption);
+        roundPayload = {
+          choiceId: selectedSupplyOption,
+          choiceLabel: optObj ? optObj.title : selectedSupplyOption,
+          justification: just,
+          summaryChoice: optObj ? optObj.title : selectedSupplyOption,
+          mainText: just
+        };
+      } else if (currentRoundIndex === 3) {
+        const acc = document.getElementById("inputR3Accountability").value.trim();
+        const aiAct = document.getElementById("inputR3AiAct").value.trim();
+        const optObj = AI_GOVERNANCE_OPTIONS.find((o) => o.id === selectedAiDataLocation);
+        roundPayload = {
+          choiceId: selectedAiDataLocation,
+          choiceLabel: optObj ? optObj.title : selectedAiDataLocation,
+          accountabilityText: acc,
+          aiActText: aiAct,
+          summaryChoice: optObj ? optObj.title : selectedAiDataLocation,
+          mainText: `Responsabilidad: ${acc} | Cumplimiento AI Act: ${aiAct}`
+        };
+      } else if (currentRoundIndex === 4) {
+        const plan = document.getElementById("inputR4ActionPlan").value.trim();
+        const optObj = AMBIDEXTERITY_OPTIONS.find((o) => o.id === selectedAmbidexterity);
+        roundPayload = {
+          choiceId: selectedAmbidexterity,
+          choiceLabel: optObj ? optObj.title : selectedAmbidexterity,
+          crisisTitle: currentSurpriseCrisis ? currentSurpriseCrisis.title : "Crisis Internacional",
+          actionPlan: plan,
+          summaryChoice: `${optObj ? optObj.title : selectedAmbidexterity} ante ${currentSurpriseCrisis ? currentSurpriseCrisis.code : "Crisis"}`,
+          mainText: plan
+        };
+      }
+
+      const evaluation = await evaluateRoundSubmission(team, currentRoundIndex, roundPayload);
+
+      if (!team.rounds) team.rounds = {};
+      team.rounds[currentRoundIndex] = {
+        ...roundPayload,
+        decisionSubmitted: true,
+        counterSubmitted: false,
+        score: evaluation.score,
+        evaluation,
+        submittedAt: new Date().toISOString()
+      };
+
+      roundStage = "counter";
+      await persistAndSyncTeams();
+
+      playGameSound("score");
+      launchScoreBurst(evaluation.score);
+      renderCeoEvaluationCard(evaluation, "");
+      startCounterQuestionTimer();
+      updateSubmitButtonState();
+    }
+
+    function renderCeoEvaluationCard(evaluation, existingCounterAnswer) {
+      const card = document.getElementById("ceoEvaluationCard");
+      card.classList.remove("hidden");
+
+      document.getElementById("evalSourceBadge").textContent = evaluation.source || "CEO IA";
+      document.getElementById("ceoRoundScore").textContent = evaluation.score;
+      document.getElementById("ceoPraiseText").textContent = evaluation.praise;
+      document.getElementById("ceoCritiqueText").textContent = evaluation.critique;
+      document.getElementById("ceoBlindSpotText").textContent = evaluation.blindSpot;
+      document.getElementById("ceoCounterQuestionText").textContent = `"${evaluation.counterQuestion}"`;
+
+      const inputCounter = document.getElementById("inputCounterAnswer");
+      inputCounter.value = existingCounterAnswer || "";
+      updateCounterButtonState();
+
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
+    }
+
+    function startCounterQuestionTimer() {
+      if (counterInterval) clearInterval(counterInterval);
+      counterElapsedSec = 0;
+      updateCounterTimerUI();
+      updateCounterButtonState();
+
+      counterInterval = setInterval(() => {
+        counterElapsedSec++;
+        const { counterLock } = getEffectiveTimings();
+        if (counterElapsedSec === counterLock) {
+          playGameSound("unlock");
+          showToast("🔓 ¡2 minutos y medio cumplidos! Si tu respuesta tiene al menos 15 caracteres, ya puedes avanzar.", "success");
+        }
+        updateCounterTimerUI();
+        updateCounterButtonState();
+      }, 1000);
+    }
+
+    function updateCounterTimerUI() {
+      const { counterLock } = getEffectiveTimings();
+      const rem = Math.max(0, counterLock - counterElapsedSec);
+      const clockEl = document.getElementById("counterClockDisplay");
+      const statusEl = document.getElementById("counterTimerStatus");
+
+      if (clockEl) clockEl.textContent = formatMMSS(rem);
+      if (statusEl) {
+        if (rem > 0) {
+          statusEl.textContent = `⏳ Deliberando contrapregunta (${formatMMSS(rem)} restantes)...`;
+          statusEl.className = "text-[#FFE600] font-bold";
+        } else {
+          statusEl.textContent = "🔓 Tiempo de contrapregunta cumplido (2:30 min)";
+          statusEl.className = "text-emerald-300 font-bold";
+        }
+      }
+    }
+
+    function updateCounterButtonState() {
+      const { counterLock } = getEffectiveTimings();
+      const rem = Math.max(0, counterLock - counterElapsedSec);
+      const val = (document.getElementById("inputCounterAnswer")?.value || "").trim();
+      const minChars = appConfig.minCounterChars || 15;
+
+      const charEl = document.getElementById("counterCharCount");
+      if (charEl) {
+        charEl.textContent = `${val.length} / ${minChars} caracteres mínimos`;
+        charEl.className = val.length >= minChars ? "text-emerald-300 font-bold" : "text-white/70";
+      }
+
+      const btn = document.getElementById("btnSubmitCounterAnswer");
+      const icon = document.getElementById("btnCounterIcon");
+      const text = document.getElementById("btnCounterText");
+      if (!btn || !icon || !text) return;
+
+      const nextLabel = currentRoundIndex < 4
+        ? `¡GUARDAR RESPUESTA Y PASAR A LA RONDA ${currentRoundIndex + 1}! ➔`
+        : `¡FINALIZAR Y VER INFORME DEL CEO + GUÍA DE PITCH! 🏆`;
+
+      if (rem > 0 || val.length < minChars) {
+        btn.disabled = true;
+        icon.textContent = "🔒";
+        if (rem > 0 && val.length < minChars) {
+          text.textContent = `Faltan ${formatMMSS(rem)} y al menos ${minChars} caracteres`;
+        } else if (rem > 0) {
+          text.textContent = `Respuesta lista • Desbloquea en ${formatMMSS(rem)}`;
+        } else {
+          text.textContent = `Escribe al menos ${minChars - val.length} caracteres más para desbloquear`;
+        }
+      } else {
+        btn.disabled = false;
+        icon.textContent = "🔓";
+        text.textContent = nextLabel;
+      }
+    }
+
+    async function handleCounterSubmit() {
+      const { counterLock } = getEffectiveTimings();
+      const val = (document.getElementById("inputCounterAnswer")?.value || "").trim();
+      if (counterElapsedSec < counterLock || val.length < (appConfig.minCounterChars || 15)) return;
+
+      const team = allTeams[currentTeamId];
+      if (!team || !team.rounds || !team.rounds[currentRoundIndex]) return;
+
+      team.rounds[currentRoundIndex].counterAnswer = val;
+      team.rounds[currentRoundIndex].counterSubmitted = true;
+      team.rounds[currentRoundIndex].completedAt = new Date().toISOString();
+
+      playGameSound("score");
+      await persistAndSyncTeams();
+
+      if (currentRoundIndex < 4) {
+        currentRoundIndex++;
+        roundStage = "decision";
+        loadRoundScreen(currentRoundIndex, "decision");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        stopAllRoundTimers();
+        renderFinalReportView();
+        switchMainView("viewFinalReport");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
+    /********************************************************************
+     * INFORME FINAL DEL CEO Y GUÍA DE PITCH DE 2 MINUTOS
+     ********************************************************************/
+    function renderFinalReportView() {
+      const team = allTeams[currentTeamId];
+      if (!team) return;
+
+      const total = calculateTeamTotalScore(team);
+      document.getElementById("finalTeamName").textContent = team.name;
+      document.getElementById("finalTeamRoom").textContent = team.room || "Sala Microsoft Teams";
+      document.getElementById("finalTotalScore").textContent = total;
+
+      let badge = "🏅 Consultora Junior en Desarrollo";
+      let verdict = "";
+      if (total >= 34) {
+        badge = "🥇 Socio Estratégico Global (Nivel Élite)";
+        verdict = `¡Extraordinario trabajo, ${team.name}! Con ${total}/40 puntos, su firma demostró dominio integral de escenarios macroeconómicos PESTEL, reglas de origen en cadenas de suministro, gobernanza de IA bajo el AI Act y ambidestreza frente a choques externos. El directorio de Andina Motion S.A. aprueba su hoja de ruta hacia EE. UU.`;
+      } else if (total >= 26) {
+        badge = "🥈 Consultora Senior Aprobada con Condiciones";
+        verdict = `Buen desempeño estratégico (${total}/40 puntos). Su hoja de ruta para llevar a Andina Motion S.A. a EE. UU. es viable y coherente, aunque deberán vigilar de cerca los puntos ciegos financieros y regulatorios que les señalé en cada contrapregunta durante su Pitch de 2 minutos.`;
+      } else {
+        badge = "🥉 Consultora en Observación por el Directorio";
+        verdict = `Obtuvieron ${total}/40 puntos. Tomaron decisiones valientes para Andina Motion S.A., pero dejaron brechas operativas y legales importantes. Su última oportunidad para convencer a la junta directiva es defender con datos concretos su Pitch de 2 minutos.`;
+      }
+      document.getElementById("finalRankBadge").textContent = badge;
+      document.getElementById("finalCeoSummaryText").textContent = verdict;
+
+      const titles = {
+        1: "Ronda 1 • Escenarios PESTEL",
+        2: "Ronda 2 • Cadena de Suministro",
+        3: "Ronda 3 • Gobernanza IA y Datos",
+        4: "Ronda 4 • Crisis y Ambidestreza"
+      };
+
+      const breakdownEl = document.getElementById("finalRoundsBreakdown");
+      breakdownEl.innerHTML = [1, 2, 3, 4].map((r) => {
+        const rd = team.rounds?.[r] || {};
+        return `
+          <div class="p-4 rounded-2xl bg-[#120324]/85 border-2 border-white/15 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-game text-base text-[#00F0FF]">${titles[r]}</span>
+              <span class="font-game text-lg text-[#FFE600]">${rd.score ?? 0}/10 pts</span>
+            </div>
+            <div class="text-xs font-bold text-white/90">Elección: <span class="text-[#FFE600]">${escapeHtml(rd.summaryChoice || "-")}</span></div>
+            <p class="text-xs text-white/80 line-clamp-3">${escapeHtml(rd.mainText || "")}</p>
+            <div class="pt-2 border-t border-white/10 text-[11px] text-emerald-300">
+              <strong>Defensa ante contrapregunta:</strong> ${escapeHtml(rd.counterAnswer || "")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Guía personalizada para el Pitch de 2 minutos (dividida en 4 bloques de 30 segundos)
+      const r1 = team.rounds?.[1] || {};
+      const r2 = team.rounds?.[2] || {};
+      const r3 = team.rounds?.[3] || {};
+      const r4 = team.rounds?.[4] || {};
+
+      document.getElementById("finalPitchGuideSteps").innerHTML = `
+        <div class="p-4 rounded-2xl bg-[#120324] border-2 border-[#FF1E8A] space-y-1.5">
+          <div class="text-xs font-bold text-[#FF1E8A] uppercase">⏱️ 0:00 a 0:30 • Gancho & PESTEL</div>
+          <div class="font-game text-base text-white">1. El Mapa de Riesgo</div>
+          <p class="text-xs text-white/85 leading-relaxed">
+            Abrimos con las 3 incertidumbres críticas que vigilará <strong>${escapeHtml(team.name)}</strong> (${escapeHtml(r1.summaryChoice || "PESTEL")}) y cómo blindamos a Andina Motion si ocurre el escenario pesimista.
+          </p>
+        </div>
+        <div class="p-4 rounded-2xl bg-[#120324] border-2 border-[#00F0FF] space-y-1.5">
+          <div class="text-xs font-bold text-[#00F0FF] uppercase">⏱️ 0:30 a 1:00 • Operaciones</div>
+          <div class="font-game text-base text-white">2. Ruta Productiva a EE. UU.</div>
+          <p class="text-xs text-white/85 leading-relaxed">
+            Defendemos por qué elegimos <strong>${escapeHtml(r2.summaryChoice || "nuestra cadena de suministro")}</strong> para entregar en EE. UU. protegiendo margen y reglas de origen.
+          </p>
+        </div>
+        <div class="p-4 rounded-2xl bg-[#120324] border-2 border-[#FFE600] space-y-1.5">
+          <div class="text-xs font-bold text-[#FFE600] uppercase">⏱️ 1:00 a 1:30 • Confianza Digital</div>
+          <div class="font-game text-base text-white">3. Soberanía IA & AI Act</div>
+          <p class="text-xs text-white/85 leading-relaxed">
+            Explicamos nuestra arquitectura en <strong>${escapeHtml(r3.summaryChoice || "datos")}</strong>, quién responde legalmente por el algoritmo de baterías y la auditoría de alto riesgo.
+          </p>
+        </div>
+        <div class="p-4 rounded-2xl bg-[#120324] border-2 border-[#FF6B00] space-y-1.5">
+          <div class="text-xs font-bold text-[#FF6B00] uppercase">⏱️ 1:30 a 2:00 • Cierre Ejecutivo</div>
+          <div class="font-game text-base text-white">4. Ambidestreza ante Crisis</div>
+          <p class="text-xs text-white/85 leading-relaxed">
+            Cerramos mostrando cómo superamos el choque sorpresa con <strong>${escapeHtml(r4.summaryChoice || "ambidestreza")}</strong> y pedimos luz verde al directorio para los 5 años.
+          </p>
+        </div>
+      `;
+    }
+
+    /********************************************************************
+     * PANEL DE ANFITRIONAS (?host=CLAVE + CONTRASEÑA + PROYECTAR)
+     ********************************************************************/
+    function openHostPanelView() {
+      switchMainView("viewHost");
+      const gate = document.getElementById("hostAuthGate");
+      const dash = document.getElementById("hostDashboardContent");
+      if (hostUnlocked) {
+        gate.classList.add("hidden");
+        dash.classList.remove("hidden");
+        renderHostDashboard();
+      } else {
+        gate.classList.remove("hidden");
+        dash.classList.add("hidden");
+      }
+    }
+
+    function renderHostDashboard() {
+      const tbody = document.getElementById("hostLeaderboardBody");
+      const accordion = document.getElementById("hostTeamsAccordion");
+      if (!tbody || !accordion) return;
+
+      const sortedTeams = Object.values(allTeams).sort((a, b) => calculateTeamTotalScore(b) - calculateTeamTotalScore(a));
+
+      if (sortedTeams.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-8 text-center text-white/70">
+              Aún no hay consultoras en juego. Pide a los 4 equipos que ingresen desde sus salas de Microsoft Teams o pulsa <strong>"✨ Simular 4 Equipos"</strong> arriba para probar el marcador.
+            </td>
+          </tr>
+        `;
+        accordion.innerHTML = "";
+        return;
+      }
+
+      tbody.innerHTML = sortedTeams.map((t, index) => {
+        const medal = index === 0 ? "🥇 1°" : index === 1 ? "🥈 2°" : index === 2 ? "🥉 3°" : `🏅 ${index + 1}°`;
+        const r1 = t.rounds?.[1]?.score ?? "—";
+        const r2 = t.rounds?.[2]?.score ?? "—";
+        const r3 = t.rounds?.[3]?.score ?? "—";
+        const r4 = t.rounds?.[4]?.score ?? "—";
+        const total = calculateTeamTotalScore(t);
+
+        return `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-3.5 px-3 font-game text-lg sm:text-xl text-[#FFE600]">${medal}</td>
+            <td class="py-3.5 px-3">
+              <div class="font-game text-base sm:text-lg text-white">${escapeHtml(t.name)}</div>
+              <div class="text-xs text-white/70">${escapeHtml(t.room || "Sala")} ${t.members ? "• " + escapeHtml(t.members) : ""}</div>
+            </td>
+            <td class="py-3.5 px-3 text-center font-game text-base sm:text-lg text-[#FF1E8A]">${r1}</td>
+            <td class="py-3.5 px-3 text-center font-game text-base sm:text-lg text-[#00F0FF]">${r2}</td>
+            <td class="py-3.5 px-3 text-center font-game text-base sm:text-lg text-[#FFE600]">${r3}</td>
+            <td class="py-3.5 px-3 text-center font-game text-base sm:text-lg text-[#FF6B00]">${r4}</td>
+            <td class="py-3.5 px-3 text-right font-game text-2xl sm:text-3xl text-[#FFE600]">${total}</td>
+            <td class="py-3.5 px-3 text-center hide-on-projector">
+              <button type="button" data-inspect-team="${escapeHtml(t.id)}" class="game-btn bg-white/15 hover:bg-[#00F0FF] hover:text-[#120324] text-white text-xs font-bold px-3 py-1.5">
+                🔍 Ver Respuestas
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      tbody.querySelectorAll("[data-inspect-team]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tid = btn.getAttribute("data-inspect-team");
+          expandedHostTeamIds[tid] = true;
+          renderHostDashboard();
+          const cardEl = document.getElementById(`hostTeamDetail_${tid}`);
+          if (cardEl) cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      });
+
+      accordion.innerHTML = sortedTeams.map((t, index) => {
+        const isOpen = Boolean(expandedHostTeamIds[t.id]);
+        const total = calculateTeamTotalScore(t);
+        const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🏅";
+
+        return `
+          <div id="hostTeamDetail_${escapeHtml(t.id)}" class="game-card border-white/20 overflow-hidden">
+            <button type="button" data-toggle-accordion="${escapeHtml(t.id)}" class="w-full p-4 sm:p-5 flex items-center justify-between bg-white/5 hover:bg-white/10 transition text-left">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">${medal}</span>
+                <div>
+                  <div class="font-game text-lg sm:text-xl text-white">${escapeHtml(t.name)} <span class="text-xs font-sans text-[#00F0FF] ml-1">(${escapeHtml(t.room || "Sala")})</span></div>
+                  <div class="text-xs text-white/70">${escapeHtml(t.members || "Sin integrantes listados")}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-game text-xl text-[#FFE600]">${total} / 40 pts</span>
+                <span class="text-lg text-white/80">${isOpen ? "▲" : "▼"}</span>
+              </div>
+            </button>
+
+            <div class="${isOpen ? "block" : "hidden"} p-4 sm:p-6 border-t border-white/15 grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#120324]/70">
+              ${[1, 2, 3, 4].map((r) => {
+                const rd = t.rounds?.[r];
+                if (!rd || !rd.decisionSubmitted) {
+                  return `
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-white/60">
+                      <div class="font-game text-sm text-white/80 mb-1">Ronda ${r}</div>
+                      En espera de envío del equipo...
+                    </div>
+                  `;
+                }
+                return `
+                  <div class="p-4 rounded-xl bg-[#1C073B] border-2 border-white/15 space-y-2 text-xs sm:text-sm">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
+                      <span class="font-game text-base text-[#00F0FF]">Ronda ${r}</span>
+                      <span class="font-game text-base text-[#FFE600]">${rd.score}/10 pts</span>
+                    </div>
+                    <div><strong class="text-[#FFE600]">Elección:</strong> ${escapeHtml(rd.summaryChoice || "")}</div>
+                    <div><strong class="text-white/80">Argumento del equipo:</strong> <p class="text-white/95 mt-0.5">${escapeHtml(rd.mainText || "")}</p></div>
+                    <div class="p-2.5 rounded-lg bg-black/40 border border-white/10 space-y-1 text-xs">
+                      <div class="text-emerald-300"><strong>👏 Elogio CEO:</strong> ${escapeHtml(rd.evaluation?.praise || "")}</div>
+                      <div class="text-[#FF85B3]"><strong>⚡ Crítica CEO:</strong> ${escapeHtml(rd.evaluation?.critique || "")}</div>
+                      <div class="text-[#FFB074]"><strong>⚠️ Punto Ciego:</strong> ${escapeHtml(rd.evaluation?.blindSpot || "")}</div>
+                    </div>
+                    <div class="pt-1">
+                      <div class="text-[#00F0FF] font-bold">🎯 Contrapregunta: "${escapeHtml(rd.evaluation?.counterQuestion || "")}"</div>
+                      <div class="mt-1 text-white/95"><strong>Respuesta del equipo:</strong> ${rd.counterSubmitted ? escapeHtml(rd.counterAnswer) : '<em class="text-[#FFE600]">Deliberando respuesta (2:30m)...</em>'}</div>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      accordion.querySelectorAll("[data-toggle-accordion]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tid = btn.getAttribute("data-toggle-accordion");
+          expandedHostTeamIds[tid] = !expandedHostTeamIds[tid];
+          renderHostDashboard();
+        });
+      });
+    }
+
+    /********************************************************************
+     * GENERADOR DE 4 EQUIPOS DEMO (PARA PROBAR EL MARCADOR AL INSTANTE)
+     ********************************************************************/
+    async function seedFourDemoTeams() {
+      playGameSound("score");
+      const sampleTeams = [
+        {
+          id: "team_demo_1",
+          name: "Andes Global Partners",
+          room: "Sala 1",
+          members: "Valentina, Sebastián, Camila",
+          rounds: {
+            1: {
+              choiceIds: ["P2", "E1", "L1"],
+              summaryChoice: "3 Incertidumbres PESTEL: P2, E1, L1",
+              optimisticText: "Aprovechamos los subsidios estatales en EE. UU. y certificamos UL 2849 desde el mes 6, logrando contratos B2B con flotas de delivery en Nueva York.",
+              pessimisticText: "Si se dispara el dólar y suben tasas, cubrimos con forwards COP/USD y vendemos mediante leasing operativo a distribuidores.",
+              mainText: "Optimista: Certificación UL 2849 + alianzas B2B en NY | Pesimista: Cobertura cambiaria forward COP/USD y modelo de suscripción.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 9,
+              evaluation: {
+                score: 9,
+                praise: "Excelente priorización de la norma obligatoria UL 2849 y cobertura cambiaria.",
+                critique: "Faltó precisar el costo financiero de ofrecer leasing en dólares.",
+                blindSpot: "Riesgo de impago de flotas pequeñas de última milla en invierno.",
+                counterQuestion: "¿Cómo garantizan el flujo de caja si el costo de certificar UL 2849 sube 18%?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Exigimos anticipo del 30% a distribuidores B2B en Florida y California y compartimos el costo de certificación por lote."
+            },
+            2: {
+              choiceId: "nearshoring_mixto",
+              summaryChoice: "Nearshoring Mixto (Colombia + Costa Rica)",
+              mainText: "Motores en Medellín bajo TLC Colombia-EE. UU. y empaquetado electrónico en zona franca de Costa Rica (CAFTA-DR) con salida marítima de 5 días a Miami.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 9,
+              evaluation: {
+                score: 9,
+                praise: "Combinación inteligente de capacidades de ingeniería en Colombia y ecosistema electrónico en Costa Rica.",
+                critique: "Coordinar dos aduanas antes de llegar a Miami exige trazabilidad ERP impecable.",
+                blindSpot: "Restricciones de transporte marítimo IMO Clase 9 para baterías de litio.",
+                counterQuestion: "¿Dónde mantienen el stock de seguridad para entregas en 21 días?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Mantenemos un buffer de 1.200 unidades en un 3PL certificado en Miami financiado con factoring internacional."
+            },
+            3: {
+              choiceId: "hibrido",
+              summaryChoice: "Arquitectura Híbrida Federada (Edge + Colombia)",
+              mainText: "Datos personales procesados en el borde (Edge) y entrenamiento anonimizado en Bogotá. Comité de Gobernanza IA firma auditorías conforme al AI Act.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 10,
+              evaluation: {
+                score: 10,
+                praise: "Soberanía híbrida impecable con supervisión humana 'human-in-the-loop' y trazabilidad AI Act.",
+                critique: "Aseguren pruebas de penetración trimestrales en el firmware de la bicicleta.",
+                blindSpot: "Responsabilidad civil cruzada con operadores móviles de IoT.",
+                counterQuestion: "¿Quién tiene el poder de veto si el algoritmo recomienda bloquear el 12% de las baterías?",
+                source: "CEO IA"
+              },
+              counterAnswer: "El Director de Seguridad de Producto tiene poder de veto vinculante sobre Ventas y activa un parche OTA inmediato con registro de auditoría."
+            },
+            4: {
+              choiceId: "estructural",
+              summaryChoice: "Ambidestreza Estructural ante Cambio Regulatorio",
+              mainText: "Separamos el equipo de operaciones actuales de una célula comando que negocia maquila contingente en Florida en 60 días.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 9,
+              evaluation: {
+                score: 9,
+                praise: "Asignación clara entre explotación del flujo de caja actual y exploración del pivote en EE. UU.",
+                critique: "Cuiden que las dos unidades no compitan por los mismos ingenieros de baterías.",
+                blindSpot: "Fuga de talento clave durante la reestructuración.",
+                counterQuestion: "Con $150.000 USD de emergencia, ¿cómo dividen el presupuesto y qué KPI mata el proyecto al día 60?",
+                source: "CEO IA"
+              },
+              counterAnswer: "70% ($105k) a asegurar entregas actuales y 30% ($45k) a la célula en Florida; si al día 60 no hay 2 cartas de intención firmadas, cerramos el piloto."
+            }
+          }
+        },
+        {
+          id: "team_demo_2",
+          name: "Pacífico Estrategia & Trade",
+          room: "Sala 2",
+          members: "Daniel, Mariana, Nicolás",
+          rounds: {
+            1: {
+              choiceIds: ["P1", "E2", "T1"],
+              summaryChoice: "3 Incertidumbres PESTEL: P1, E2, T1",
+              mainText: "Optimista: Desvío de compras de EE. UU. hacia proveedores latinos | Pesimista: Alza de fletes y guerra de precios en baterías.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 8,
+              evaluation: {
+                score: 8,
+                praise: "Buena lectura de la sustitución de importaciones chinas en EE. UU.",
+                critique: "Faltó detallar la certificación técnica obligatoria en EE. UU.",
+                blindSpot: "Norma UL 2849 de seguridad eléctrica.",
+                counterQuestion: "¿Recortan I+D o suben precios en EE. UU. si los costos suben 18%?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Mantenemos I+D intacto y trasladamos 10% a precio posicionándonos en el segmento premium de reparto urbano."
+            },
+            2: {
+              choiceId: "nearshoring_mx",
+              summaryChoice: "Nearshoring en México (Monterrey / Bajío)",
+              mainText: "Ensamble final en Monterrey para cruzar por tierra a Texas en 48 horas y reducir inventario en tránsito.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 8,
+              evaluation: {
+                score: 8,
+                praise: "Ventaja logística terrestre innegable hacia Texas y California.",
+                critique: "Alto CAPEX inicial para una mediana empresa colombiana.",
+                blindSpot: "Rotación salarial de técnicos en Nuevo León.",
+                counterQuestion: "¿Cómo financian el stock de seguridad para cumplir entregas en 21 días?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Alianza con maquiladora existente en Monterrey sin comprar planta propia durante los primeros 24 meses."
+            },
+            3: {
+              choiceId: "eeuu",
+              summaryChoice: "Nube Exclusiva en EE. UU. (AWS)",
+              mainText: "Baja latencia para los clientes de EE. UU. y auditoría algorítmica liderada por el CTO.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 7,
+              evaluation: {
+                score: 7,
+                praise: "Simplicidad técnica y cercanía al consumidor estadounidense.",
+                critique: "Dependencia total de jurisdicción estadounidense sin respaldo local.",
+                blindSpot: "Costos de salida de datos y cumplimiento extraterritorial AI Act.",
+                counterQuestion: "¿Quién responde si el algoritmo bloquea preventivamente las baterías?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Comité conjunto CTO + Legal en Bogotá con respaldo de póliza de responsabilidad cibernética en EE. UU."
+            },
+            4: {
+              choiceId: "adaptativa",
+              summaryChoice: "Estrategia Adaptativa Basada en Opciones Reales",
+              mainText: "Pivotamos a licenciar nuestro sistema de gestión de baterías B2B mientras se resuelve la retención aduanera.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 8,
+              evaluation: {
+                score: 8,
+                praise: "Gran agilidad para monetizar la propiedad intelectual sin depender solo del hardware.",
+                critique: "Los clientes actuales aún necesitan reemplazo físico de baterías.",
+                blindSpot: "Protección de patentes frente a ensambladores locales.",
+                counterQuestion: "¿Cómo reparten los $150.000 USD en los próximos 90 días?",
+                source: "CEO IA"
+              },
+              counterAnswer: "60% a liberar el lote aduanero y 40% a empaquetar licencias B2B con cláusula de volumen mínimo."
+            }
+          }
+        },
+        {
+          id: "team_demo_3",
+          name: "Bogotá Ventures Consulting",
+          room: "Sala 3",
+          members: "Paula, Santiago, Andrés",
+          rounds: {
+            1: {
+              choiceIds: ["E1", "S1", "Ec1"],
+              summaryChoice: "3 Incertidumbres PESTEL: E1, S1, Ec1",
+              mainText: "Optimista: Boom de micromovilidad verde en ciudades de EE. UU. | Pesimista: Recesión del consumo y exigencias de reciclaje de litio.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 8,
+              evaluation: {
+                score: 8,
+                praise: "Enfoque diferenciador en sostenibilidad y economía circular de baterías.",
+                critique: "Conviene atar la sostenibilidad con incentivos tributarios estatales.",
+                blindSpot: "Logística inversa de baterías agotadas en EE. UU.",
+                counterQuestion: "¿Cómo absorben un sobrecosto regulatorio del 18%?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Alianza con recicladoras certificadas en EE. UU. que nos pagan por celda recuperada, compensando el 11% del sobrecosto."
+            },
+            2: {
+              choiceId: "friendshoring",
+              summaryChoice: "Friendshoring (Alianza Andina-Norteamericana)",
+              mainText: "Litio de países con TLC (Chile), motores de Colombia y ensamblaje final ligero en Florida.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 9,
+              evaluation: {
+                score: 9,
+                praise: "Blindaje geopolítico total y acceso a incentivos 'Buy American'.",
+                critique: "Mano de obra en Florida es más costosa que en Latinoamérica.",
+                blindSpot: "Coordinación multipaís de contratos de suministro.",
+                counterQuestion: "¿Cómo financian el inventario para entregas en 21 días?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Ensamblaje modular 'late-stage customization' en Florida solo cuando entra la orden en firme del distribuidor."
+            },
+            3: {
+              choiceId: "local_edge",
+              summaryChoice: "Procesamiento Local en el Dispositivo (Edge AI)",
+              mainText: "Privacidad por diseño: el chip en la bicicleta procesa todo sin enviar rutas privadas a la nube.",
+              decisionSubmitted: true,
+              counterSubmitted: false,
+              score: 8,
+              evaluation: {
+                score: 8,
+                praise: "Elimina de raíz el riesgo de secuestro masivo de datos personales en la nube.",
+                critique: "Dificulta entrenar mejoras globales si no se recolectan datos agregados.",
+                blindSpot: "Actualización de modelos cuando la bicicleta no se conecta a internet.",
+                counterQuestion: "¿Cómo demuestran trazabilidad ante el AI Act si los logs están en cada bicicleta?",
+                source: "CEO IA"
+              },
+              counterAnswer: ""
+            }
+          }
+        },
+        {
+          id: "team_demo_4",
+          name: "Caribe Tech Advisors",
+          room: "Sala 4",
+          members: "Camila, Felipe, Juliana",
+          rounds: {
+            1: {
+              choiceIds: ["P1", "E1", "T1"],
+              summaryChoice: "3 Incertidumbres PESTEL: P1, E1, T1",
+              mainText: "Optimista: Acuerdos bilaterales y abaratamiento de celdas | Pesimista: Aranceles generalizados y devaluación abrupta.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 7,
+              evaluation: {
+                score: 7,
+                praise: "Identificaron los tres motores financieros clave del negocio.",
+                critique: "Faltó mayor detalle en el plan de contingencia comercial.",
+                blindSpot: "Certificaciones técnicas de entrada por estado.",
+                counterQuestion: "¿Suben precios o recortan I+D ante un choque del 18%?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Rediseñamos el empaque de baterías para reducir peso logístico en 14% sin tocar el presupuesto de I+D."
+            },
+            2: {
+              choiceId: "offshoring",
+              summaryChoice: "Offshoring en Asia (Shenzhen / Vietnam)",
+              mainText: "Aprovechamos economías de escala en Vietnam mientras consolidamos marca en EE. UU.",
+              decisionSubmitted: true,
+              counterSubmitted: true,
+              score: 6,
+              evaluation: {
+                score: 6,
+                praise: "Menor costo unitario de arranque y sin inversión en planta propia.",
+                critique: "Exposición crítica a aranceles de EE. UU. y tiempos de tránsito de 40 días.",
+                blindSpot: "Pérdida de beneficios del TLC Colombia-EE. UU.",
+                counterQuestion: "¿Cómo evitan perder al cliente en EE. UU. si exigen entregas en 21 días?",
+                source: "CEO IA"
+              },
+              counterAnswer: "Mantenemos 45 días de inventario buffer en zona franca de Savannah, Georgia."
+            }
+          }
+        }
+      ];
+
+      sampleTeams.forEach((st) => {
+        allTeams[st.id] = st;
+      });
+      await persistAndSyncTeams();
+      showToast("✨ Se cargaron 4 consultoras de demostración con puntajes y respuestas reales.", "success");
+    }
+
+    /********************************************************************
+     * INICIALIZACIÓN Y EVENT LISTENERS
+     ********************************************************************/
+    function initApp() {
+      loadTeamsFromLocal();
+
+      // Revisar si la URL contiene ?host=CLAVE (o cualquier valor en ?host=)
+      const params = new URLSearchParams(window.location.search);
+      const hostParamVal = params.get("host");
+
+      // Inicializar botones de barra superior
+      document.getElementById("btnToggleSound").addEventListener("click", () => {
+        soundEnabled = !soundEnabled;
+        document.getElementById("soundIcon").textContent = soundEnabled ? "🔊" : "🔇";
+        showToast(soundEnabled ? "Efectos de sonido activados" : "Sonido silenciado", "info");
+      });
+
+      document.getElementById("btnSwitchHostView").addEventListener("click", () => {
+        playGameSound("click");
+        const isCurrentlyHost = !document.getElementById("viewHost").classList.contains("hidden");
+        if (isCurrentlyHost) {
+          if (currentTeamId && allTeams[currentTeamId]) {
+            resumeTeamSession(currentTeamId);
+          } else {
+            switchMainView("viewLobby");
+          }
+        } else {
+          openHostPanelView();
+        }
+      });
+
+      document.getElementById("btnLobbyGoHost").addEventListener("click", () => {
+        playGameSound("click");
+        openHostPanelView();
+      });
+
+      // Registro de equipo
+      document.getElementById("formJoinTeam").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("inputTeamName").value.trim();
+        const room = document.getElementById("selectRoomNumber").value;
+        const members = document.getElementById("inputMembers").value.trim();
+        if (!name) return;
+
+        // Verificar si ya existe un equipo con ese nombre para retomarlo
+        const existing = Object.values(allTeams).find((t) => t.name.toLowerCase() === name.toLowerCase());
+        if (existing) {
+          resumeTeamSession(existing.id);
+          return;
+        }
+
+        const newId = "team_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+        allTeams[newId] = {
+          id: newId,
+          name,
+          room,
+          members,
+          createdAt: new Date().toISOString(),
+          rounds: {}
+        };
+        currentTeamId = newId;
+        currentRoundIndex = 1;
+        roundStage = "decision";
+        await persistAndSyncTeams();
+        playGameSound("unlock");
+        switchMainView("viewGame");
+        loadRoundScreen(1, "decision");
+      });
+
+      document.getElementById("btnSeedDemoTeams").addEventListener("click", seedFourDemoTeams);
+
+      // Botones de envío de Ronda y Contrapregunta
+      document.getElementById("btnSubmitRound").addEventListener("click", handleRoundSubmit);
+      document.getElementById("inputCounterAnswer").addEventListener("input", updateCounterButtonState);
+      document.getElementById("btnSubmitCounterAnswer").addEventListener("click", handleCounterSubmit);
+
+      // Botones de desbloqueo rápido para pruebas docentes
+      document.getElementById("btnQuickUnlockRound").addEventListener("click", () => {
+        const { submitLock } = getEffectiveTimings();
+        roundElapsedSec = Math.max(roundElapsedSec, submitLock);
+        playGameSound("unlock");
+        updateRoundTimerUI();
+        updateSubmitButtonState();
+        showToast("⚡ Reloj de 7 minutos adelantado para prueba.", "success");
+      });
+
+      document.getElementById("btnQuickUnlockCounter").addEventListener("click", () => {
+        const { counterLock } = getEffectiveTimings();
+        counterElapsedSec = Math.max(counterElapsedSec, counterLock);
+        playGameSound("unlock");
+        updateCounterTimerUI();
+        updateCounterButtonState();
+        showToast("⚡ Reloj de 2:30 min adelantado para prueba.", "success");
+      });
+
+      // Vista Informe Final y Pitch Timer
+      document.getElementById("btnStartPitchTimer").addEventListener("click", () => {
+        playGameSound("click");
+        if (pitchInterval) {
+          clearInterval(pitchInterval);
+          pitchInterval = null;
+          document.getElementById("btnStartPitchTimer").textContent = "▶ Continuar";
+          return;
+        }
+        document.getElementById("btnStartPitchTimer").textContent = "⏸ Pausar";
+        pitchInterval = setInterval(() => {
+          pitchRemainingSec = Math.max(0, pitchRemainingSec - 1);
+          document.getElementById("pitchTimerDisplay").textContent = formatMMSS(pitchRemainingSec);
+          if (pitchRemainingSec === 0) {
+            clearInterval(pitchInterval);
+            pitchInterval = null;
+            playGameSound("score");
+            showToast("⏰ ¡Tiempo de Pitch de 2 minutos finalizado!", "warn");
+            document.getElementById("btnStartPitchTimer").textContent = "▶ Iniciar 2:00";
+          }
+        }, 1000);
+      });
+
+      document.getElementById("btnResetPitchTimer").addEventListener("click", () => {
+        if (pitchInterval) {
+          clearInterval(pitchInterval);
+          pitchInterval = null;
+        }
+        pitchRemainingSec = 120;
+        document.getElementById("pitchTimerDisplay").textContent = "02:00";
+        document.getElementById("btnStartPitchTimer").textContent = "▶ Iniciar 2:00";
+      });
+
+      document.getElementById("btnBackToLobbyFromFinal").addEventListener("click", () => {
+        stopAllRoundTimers();
+        switchMainView("viewLobby");
+      });
+
+      document.getElementById("btnCopyFinalReport").addEventListener("click", () => {
+        const team = allTeams[currentTeamId];
+        if (!team) return;
+        const total = calculateTeamTotalScore(team);
+        const summary = [
+          `🏆 CONSULTORA EN CRISIS — Caso Andina Motion S.A.`,
+          `Consultora: ${team.name} (${team.room}) | Puntaje Final: ${total}/40 pts`,
+          `• R1 PESTEL (${team.rounds?.[1]?.score || 0}/10): ${team.rounds?.[1]?.summaryChoice || ""}`,
+          `• R2 Suministro (${team.rounds?.[2]?.score || 0}/10): ${team.rounds?.[2]?.summaryChoice || ""}`,
+          `• R3 Gobernanza IA (${team.rounds?.[3]?.score || 0}/10): ${team.rounds?.[3]?.summaryChoice || ""}`,
+          `• R4 Crisis & Ambidestreza (${team.rounds?.[4]?.score || 0}/10): ${team.rounds?.[4]?.summaryChoice || ""}`
+        ].join("\n");
+
+        const tempArea = document.createElement("textarea");
+        tempArea.value = summary;
+        document.body.appendChild(tempArea);
+        tempArea.select();
+        try {
+          document.execCommand("copy");
+          showToast("📋 Resumen copiado al portapapeles para pegar en Microsoft Teams.", "success");
+        } catch (e) {}
+        tempArea.remove();
+      });
+
+      // Panel de Anfitrionas (?host=CLAVE)
+      document.getElementById("formHostLogin").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const urlCode = document.getElementById("inputHostUrlKey").value.trim();
+        const pass = document.getElementById("inputHostPassword").value.trim();
+
+        const expectedParam = appConfig.hostUrlParam || "CLAVE";
+        const expectedPass = appConfig.hostPassword || "ANDINA2025";
+
+        if (urlCode.toUpperCase() === expectedParam.toUpperCase() && pass === expectedPass) {
+          hostUnlocked = true;
+          playGameSound("score");
+          openHostPanelView();
+          showToast("👑 Bienvenidos Paula, Caterin y Jorge al Panel de Anfitriones en vivo", "success");
+        } else {
+          showToast("❌ Código ?host o contraseña incorrectos. (Por defecto: CLAVE y ANDINA2025)", "warn");
+        }
+      });
+
+      document.getElementById("btnCancelHostGate").addEventListener("click", () => {
+        switchMainView("viewLobby");
+      });
+
+      document.getElementById("btnProjectorMode").addEventListener("click", () => {
+        projectorActive = !projectorActive;
+        document.body.classList.toggle("projector-mode", projectorActive);
+        document.getElementById("projectorBtnText").textContent = projectorActive ? "Salir de Proyección" : "Proyectar en Grande";
+        try {
+          if (projectorActive && document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else if (!projectorActive && document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          }
+        } catch (e) {}
+      });
+
+      document.getElementById("btnHostSeedDemo").addEventListener("click", seedFourDemoTeams);
+
+      document.getElementById("btnHostResetAll").addEventListener("click", async () => {
+        allTeams = {};
+        currentTeamId = null;
+        await persistAndSyncTeams();
+        showToast("🗑️ Marcador reiniciado para una nueva sesión de clase.", "info");
+      });
+
+      document.getElementById("btnExitHostView").addEventListener("click", () => {
+        projectorActive = false;
+        document.body.classList.remove("projector-mode");
+        switchMainView("viewLobby");
+      });
+
+      // Modal de Configuración / Herramientas Docentes
+      const modalConfig = document.getElementById("modalConfig");
+      document.getElementById("btnOpenTestTools").addEventListener("click", () => {
+        document.getElementById("inputFirebaseDbUrl").value = appConfig.firebaseDatabaseUrl || "";
+        document.getElementById("inputGeminiProxyUrl").value = appConfig.geminiProxyUrl || "";
+        document.getElementById("inputGeminiApiKeyTemp").value = appConfig.geminiSessionApiKey || "";
+        document.getElementById("inputConfigHostParam").value = appConfig.hostUrlParam || "CLAVE";
+        document.getElementById("inputConfigHostPass").value = appConfig.hostPassword || "ANDINA2025";
+        document.getElementById("fastModeStateText").textContent = appConfig.fastTestMode ? "ON (5 seg)" : "OFF (Real 7m / 2:30m)";
+        modalConfig.classList.remove("hidden");
+      });
+
+      document.getElementById("btnCloseConfigModal").addEventListener("click", () => {
+        modalConfig.classList.add("hidden");
+      });
+
+      document.getElementById("btnModalUnlockTimersNow").addEventListener("click", () => {
+        const { submitLock, counterLock } = getEffectiveTimings();
+        roundElapsedSec = Math.max(roundElapsedSec, submitLock);
+        counterElapsedSec = Math.max(counterElapsedSec, counterLock);
+        updateRoundTimerUI();
+        updateSubmitButtonState();
+        updateCounterTimerUI();
+        updateCounterButtonState();
+        playGameSound("unlock");
+        showToast("🔓 Relojes de la ronda actual desbloqueados.", "success");
+        modalConfig.classList.add("hidden");
+      });
+
+      document.getElementById("btnModalToggleFastMode").addEventListener("click", () => {
+        appConfig.fastTestMode = !appConfig.fastTestMode;
+        document.getElementById("fastModeStateText").textContent = appConfig.fastTestMode ? "ON (5 seg)" : "OFF (Real 7m / 2:30m)";
+        saveConfigToStorage();
+        updateRoundTimerUI();
+        updateSubmitButtonState();
+        updateCounterTimerUI();
+        updateCounterButtonState();
+        showToast(appConfig.fastTestMode ? "🚀 Modo Prueba Rápida activado (bloqueos de 5 seg)" : "⏱️ Modo Clase Real activado (7 min y 2:30 min)", "info");
+      });
+
+      document.getElementById("btnSaveConfigModal").addEventListener("click", () => {
+        appConfig.firebaseDatabaseUrl = document.getElementById("inputFirebaseDbUrl").value.trim();
+        appConfig.geminiProxyUrl = document.getElementById("inputGeminiProxyUrl").value.trim();
+        appConfig.geminiSessionApiKey = document.getElementById("inputGeminiApiKeyTemp").value.trim();
+        appConfig.hostUrlParam = document.getElementById("inputConfigHostParam").value.trim() || "CLAVE";
+        appConfig.hostPassword = document.getElementById("inputConfigHostPass").value.trim() || "ANDINA2025";
+        saveConfigToStorage();
+        modalConfig.classList.add("hidden");
+        pollFirebaseIfConfigured();
+        showToast("💾 Configuración guardada correctamente.", "success");
+      });
+
+      // Render inicial
+      refreshAllViews();
+
+      // Si entró con ?host=CLAVE en la URL, abrir directamente la puerta de anfitrionas
+      if (hostParamVal) {
+        document.getElementById("inputHostUrlKey").value = hostParamVal;
+        openHostPanelView();
+      }
+
+      // Polling periódico a Firebase si está configurado
+      setInterval(pollFirebaseIfConfigured, 4000);
+    }
+
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>
